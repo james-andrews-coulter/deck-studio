@@ -21,6 +21,15 @@ export const useAppStore = create<AppState>()(
       storage: createJSONStorage(() => idbStorage),
       partialize: (s) => ({ decks: s.decks, lists: s.lists }),
       migrate: (state, version) => migrate(state, version) as AppState,
+      onRehydrateStorage: () => (_state, err) => {
+        if (err) {
+          queueMicrotask(() => {
+            import('sonner').then(({ toast }) => {
+              toast.error("Couldn't load saved data. Your work is safe but not restored.");
+            });
+          });
+        }
+      },
     }
   )
 );
