@@ -5,6 +5,7 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator,
 } from './ui/dropdown-menu';
+import { ConfirmDialog } from './ConfirmDialog';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store';
 import type { Group, GroupColor } from '@/lib/types';
@@ -28,6 +29,7 @@ export function GroupHeader({ listId, group, count }: Props) {
   const deleteGroup = useAppStore((s) => s.deleteGroup);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(group.name);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const onRename = () => {
     if (name.trim() && name !== group.name) renameGroup(listId, group.id, name.trim());
@@ -80,16 +82,21 @@ export function GroupHeader({ listId, group, count }: Props) {
           <DropdownMenuItem onClick={() => setEditing(true)}>Rename</DropdownMenuItem>
           <DropdownMenuItem
             className="text-red-600"
-            onClick={() => {
-              if (confirm(`Delete group "${group.name}"? Cards move to Ungrouped.`)) {
-                deleteGroup(listId, group.id);
-              }
-            }}
+            onClick={() => setConfirmDeleteOpen(true)}
           >
             Delete group
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title={`Delete group "${group.name}"?`}
+        description="Cards in this group will move to Ungrouped."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => deleteGroup(listId, group.id)}
+      />
     </div>
   );
 }
