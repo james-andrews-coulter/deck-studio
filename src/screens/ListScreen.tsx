@@ -25,6 +25,8 @@ import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
 import { ListMenu } from '@/components/ListMenu';
 import { SwipeSession } from '@/components/SwipeSession';
+import { SwipeableRow } from '@/components/SwipeableRow';
+import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -57,8 +59,12 @@ export default function ListScreen() {
   const collapsed = useAppStore((s) => s.ui.collapsedGroups);
   const setCardRefs = useAppStore((s) => s.setCardRefs);
   const moveCardToGroupAt = useAppStore((s) => s.moveCardToGroupAt);
+  const moveCardToGroup = useAppStore((s) => s.moveCardToGroup);
+  const setHidden = useAppStore((s) => s.setHidden);
   const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
   const setDrawOpen = useAppStore((s) => s.setDrawCardOpen);
+
+  const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
 
   const [params, setParams] = useSearchParams();
   const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
@@ -236,13 +242,20 @@ export default function ListScreen() {
                           const card = deck.cards.find((c) => c.id === r.cardId);
                           return (
                             <SortableCard key={r.cardId} id={r.cardId}>
-                              {card ? (
-                                <CardView card={card} mapping={deck.fieldMapping} />
-                              ) : (
-                                <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                                  Missing card
-                                </div>
-                              )}
+                              <SwipeableRow
+                                onHide={() => setHidden(list.id, r.cardId, true)}
+                                onRequestMove={() =>
+                                  setMoveTarget({ cardIds: [r.cardId] })
+                                }
+                              >
+                                {card ? (
+                                  <CardView card={card} mapping={deck.fieldMapping} />
+                                ) : (
+                                  <div className="rounded border p-2 text-sm italic text-muted-foreground">
+                                    Missing card
+                                  </div>
+                                )}
+                              </SwipeableRow>
                             </SortableCard>
                           );
                         })}
@@ -277,13 +290,20 @@ export default function ListScreen() {
                       const card = deck.cards.find((c) => c.id === r.cardId);
                       return (
                         <SortableCard key={r.cardId} id={r.cardId}>
-                          {card ? (
-                            <CardView card={card} mapping={deck.fieldMapping} />
-                          ) : (
-                            <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                              Missing card
-                            </div>
-                          )}
+                          <SwipeableRow
+                            onHide={() => setHidden(list.id, r.cardId, true)}
+                            onRequestMove={() =>
+                              setMoveTarget({ cardIds: [r.cardId] })
+                            }
+                          >
+                            {card ? (
+                              <CardView card={card} mapping={deck.fieldMapping} />
+                            ) : (
+                              <div className="rounded border p-2 text-sm italic text-muted-foreground">
+                                Missing card
+                              </div>
+                            )}
+                          </SwipeableRow>
                         </SortableCard>
                       );
                     })}
@@ -296,6 +316,18 @@ export default function ListScreen() {
       </DndContext>
 
       <HiddenCardsSheet listId={list.id} />
+      <MoveToGroupDialog
+        open={!!moveTarget}
+        onOpenChange={(o) => !o && setMoveTarget(null)}
+        groups={list.groups}
+        onPick={(groupId) => {
+          if (!moveTarget) return;
+          for (const cid of moveTarget.cardIds) {
+            moveCardToGroup(list.id, cid, groupId);
+          }
+          setMoveTarget(null);
+        }}
+      />
 
       <button
         aria-label="Draw a random card"
