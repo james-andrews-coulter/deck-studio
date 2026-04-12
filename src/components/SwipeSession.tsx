@@ -110,8 +110,8 @@ export function SwipeSession({ listId, onDone }: Props) {
         <Button variant="outline" onClick={undo} disabled={!undoStack.length}>
           Undo
         </Button>
-        <Button variant="outline" onClick={drawRandom} aria-label="Draw a random card">
-          🎲 Draw
+        <Button variant="outline" onClick={drawRandom} aria-label="Randomize the current card">
+          🎲 Randomize
         </Button>
         <Button onClick={() => commit('keep')}>Keep</Button>
       </div>
