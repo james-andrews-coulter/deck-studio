@@ -8,7 +8,7 @@ export default function DecksScreen() {
   const decks = useAppStore(useShallow((s) => Object.values(s.decks)));
   const setDeckDetail = useAppStore((s) => s.setDeckDetail);
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-3 md:p-5">
       <header className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Decks</h2>
         <ImportDeckButton />
@@ -25,13 +25,13 @@ export default function DecksScreen() {
           }
         />
       ) : (
-        <ul className="mt-4 divide-y rounded-md border">
+        <ul className="mt-4 divide-y divide-border/60 rounded-md border">
           {decks.map((d) => (
             <li key={d.id}>
               <button
                 type="button"
                 onClick={() => setDeckDetail(d.id)}
-                className="flex w-full items-center justify-between p-3 text-left hover:bg-muted"
+                className="flex w-full items-center justify-between p-2.5 text-left hover:bg-muted"
               >
                 <span className="font-medium">{d.name}</span>
                 <span className="text-xs text-muted-foreground">

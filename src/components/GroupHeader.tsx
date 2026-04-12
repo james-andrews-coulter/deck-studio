@@ -37,7 +37,7 @@ export function GroupHeader({ listId, group, count }: Props) {
   };
 
   return (
-    <div className="flex items-center gap-2 border-b pb-2">
+    <div className="flex items-center gap-2 border-b pb-1.5">
       <button
         aria-label={collapsed ? 'Expand' : 'Collapse'}
         onClick={() => toggleCollapsed(group.id)}

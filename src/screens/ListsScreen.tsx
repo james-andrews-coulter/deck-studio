@@ -67,7 +67,7 @@ export default function ListsScreen() {
   };
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-3 md:p-5">
       <header className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Lists</h2>
         <Button onClick={() => setWizardOpen(true)} disabled={decks.length === 0}>
@@ -81,13 +81,13 @@ export default function ListsScreen() {
           body={decks.length === 0 ? 'Import a deck first.' : 'Create a list from a deck.'}
         />
       ) : (
-        <ul className="mt-4 divide-y rounded-md border">
+        <ul className="mt-4 divide-y divide-border/60 rounded-md border">
           {lists.map((l) => {
             const deck = useAppStore.getState().decks[l.deckId];
             const c = visibleCount[l.id];
             return (
               <li key={l.id} className="flex items-center">
-                <Link className="flex-1 p-3 hover:bg-muted" to={`/lists/${l.id}`}>
+                <Link className="flex-1 p-2.5 hover:bg-muted" to={`/lists/${l.id}`}>
                   <div className="font-medium">{l.name}</div>
                   <div className="text-xs text-muted-foreground">
                     {deck?.name ?? 'Unknown deck'} · {c.visible}/{c.total} cards ·{' '}

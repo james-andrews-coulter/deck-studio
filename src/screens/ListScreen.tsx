@@ -120,7 +120,7 @@ export default function ListScreen() {
   const ungroupedRows = refsByGroup(null);
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-3 md:p-5">
       <header className="flex items-center gap-2">
         <InlineRenameHeading
           value={list.name}
@@ -186,14 +186,14 @@ export default function ListScreen() {
         {list.groups.map((g) => {
           const rows = refsByGroup(g.id);
           return (
-            <section key={g.id} className="mt-6">
+            <section key={g.id} className="mt-4">
               <GroupHeader listId={list.id} group={g} count={rows.length} />
               {!collapsed[g.id] && (
                 <SortableContext
                   items={rows.map((r) => r.cardId)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <ul className="mt-2 space-y-2">
+                  <ul className="mt-2 space-y-1.5">
                     {rows.map((r) => {
                       const card = deck.cards.find((c) => c.id === r.cardId);
                       return (
@@ -216,13 +216,13 @@ export default function ListScreen() {
         })}
 
         {ungroupedRows.length > 0 && (
-          <section className="mt-6">
+          <section className="mt-4">
             <h3 className="mb-2 text-sm font-semibold uppercase text-muted-foreground">(Ungrouped)</h3>
             <SortableContext
               items={ungroupedRows.map((r) => r.cardId)}
               strategy={verticalListSortingStrategy}
             >
-              <ul className="space-y-2">
+              <ul className="space-y-1.5">
                 {ungroupedRows.map((r) => {
                   const card = deck.cards.find((c) => c.id === r.cardId);
                   return (
