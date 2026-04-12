@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   DndContext,
@@ -13,9 +13,11 @@ import {
 } from '@dnd-kit/core';
 import {
   SortableContext,
+  useSortable,
   verticalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
@@ -47,6 +49,34 @@ function GroupDropZone({
     >
       {children}
     </div>
+  );
+}
+
+const GROUP_HEADER_PREFIX = 'groupheader:';
+
+function SortableGroupSection({
+  groupId,
+  children,
+}: {
+  groupId: string;
+  children: (headerDragHandle: React.HTMLAttributes<HTMLDivElement>) => ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `${GROUP_HEADER_PREFIX}${groupId}`,
+  });
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+  const handleProps: React.HTMLAttributes<HTMLDivElement> = {
+    ...attributes,
+    ...(listeners as React.HTMLAttributes<HTMLDivElement>),
+  };
+  return (
+    <section ref={setNodeRef} style={style} className="mt-4">
+      {children(handleProps)}
+    </section>
   );
 }
 
@@ -138,15 +168,30 @@ export default function ListScreen() {
   const onDragEnd = (evt: DragEndEvent) => {
     const { active, over } = evt;
     if (!over || active.id === over.id) return;
-    const activeRef = list.cardRefs.find((r) => r.cardId === active.id);
+    const activeId = String(active.id);
+    const overId = String(over.id);
+
+    // Group reorder
+    if (activeId.startsWith(GROUP_HEADER_PREFIX)) {
+      if (!overId.startsWith(GROUP_HEADER_PREFIX)) return;
+      const fromGid = activeId.slice(GROUP_HEADER_PREFIX.length);
+      const toGid = overId.slice(GROUP_HEADER_PREFIX.length);
+      const from = list.groups.findIndex((g) => g.id === fromGid);
+      const to = list.groups.findIndex((g) => g.id === toGid);
+      if (from >= 0 && to >= 0 && from !== to) {
+        useAppStore.getState().reorderGroups(list.id, from, to);
+      }
+      return;
+    }
+
+    const activeRef = list.cardRefs.find((r) => r.cardId === activeId);
     if (!activeRef) return;
 
-    const overId = String(over.id);
     if (overId.startsWith('group:')) {
       const rawGroupId = overId.slice('group:'.length);
       const targetGroupId = rawGroupId === UNGROUPED_DROP_ID ? null : rawGroupId;
       if (activeRef.groupId === targetGroupId) return;
-      moveCardToGroupAt(list.id, String(active.id), targetGroupId, 0);
+      moveCardToGroupAt(list.id, activeId, targetGroupId, 0);
       return;
     }
 
@@ -165,7 +210,7 @@ export default function ListScreen() {
       // cross-group: place before overRef in its group
       const groupRefs = list.cardRefs.filter((r) => r.groupId === overRef.groupId);
       const idx = groupRefs.findIndex((r) => r.cardId === overRef.cardId);
-      moveCardToGroupAt(list.id, String(active.id), overRef.groupId, idx);
+      moveCardToGroupAt(list.id, activeId, overRef.groupId, idx);
     }
   };
 
@@ -284,32 +329,46 @@ export default function ListScreen() {
       ) : (
         <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        {list.groups.map((g) => {
-          const rows = refsByGroup(g.id);
-          return (
-            <section key={g.id} className="mt-4">
-              <GroupHeader listId={list.id} group={g} count={rows.length} />
-              {!collapsed[g.id] && (
-                <GroupDropZone groupId={g.id}>
-                  <SortableContext
-                    items={rows.map((r) => r.cardId)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {rows.length === 0 ? (
-                      <div className="py-4 text-center text-xs text-muted-foreground">
-                        Drop cards here
-                      </div>
-                    ) : (
-                      <ul className="mt-2 space-y-1.5">
-                        {rows.map((r) => renderRow(r.cardId))}
-                      </ul>
+        <SortableContext
+          items={list.groups.map((g) => `${GROUP_HEADER_PREFIX}${g.id}`)}
+          strategy={verticalListSortingStrategy}
+        >
+          {list.groups.map((g) => {
+            const rows = refsByGroup(g.id);
+            return (
+              <SortableGroupSection key={g.id} groupId={g.id}>
+                {(dragHandleProps) => (
+                  <>
+                    <GroupHeader
+                      listId={list.id}
+                      group={g}
+                      count={rows.length}
+                      dragHandleProps={selectMode ? undefined : dragHandleProps}
+                    />
+                    {!collapsed[g.id] && (
+                      <GroupDropZone groupId={g.id}>
+                        <SortableContext
+                          items={rows.map((r) => r.cardId)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          {rows.length === 0 ? (
+                            <div className="py-4 text-center text-xs text-muted-foreground">
+                              Drop cards here
+                            </div>
+                          ) : (
+                            <ul className="mt-2 space-y-1.5">
+                              {rows.map((r) => renderRow(r.cardId))}
+                            </ul>
+                          )}
+                        </SortableContext>
+                      </GroupDropZone>
                     )}
-                  </SortableContext>
-                </GroupDropZone>
-              )}
-            </section>
-          );
-        })}
+                  </>
+                )}
+              </SortableGroupSection>
+            );
+          })}
+        </SortableContext>
 
         {(list.groups.length > 0 || ungroupedRows.length > 0) && (
           <section className="mt-4">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type HTMLAttributes } from 'react';
 import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -19,9 +19,14 @@ const colorSwatch: Record<GroupColor, string> = {
   violet: 'bg-violet-500',
 };
 
-type Props = { listId: string; group: Group; count: number };
+type Props = {
+  listId: string;
+  group: Group;
+  count: number;
+  dragHandleProps?: HTMLAttributes<HTMLDivElement>;
+};
 
-export function GroupHeader({ listId, group, count }: Props) {
+export function GroupHeader({ listId, group, count, dragHandleProps }: Props) {
   const collapsed = useAppStore((s) => !!s.ui.collapsedGroups[group.id]);
   const toggleCollapsed = useAppStore((s) => s.toggleGroupCollapsed);
   const renameGroup = useAppStore((s) => s.renameGroup);
@@ -37,10 +42,17 @@ export function GroupHeader({ listId, group, count }: Props) {
   };
 
   return (
-    <div className="flex items-center gap-2 border-b pb-1.5">
+    <div
+      {...dragHandleProps}
+      className={cn(
+        'flex items-center gap-2 border-b pb-1.5',
+        dragHandleProps && 'touch-none',
+      )}
+    >
       <button
         aria-label={collapsed ? 'Expand' : 'Collapse'}
         onClick={() => toggleCollapsed(group.id)}
+        onPointerDown={(e) => e.stopPropagation()}
         className="flex items-center"
       >
         {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -53,17 +65,27 @@ export function GroupHeader({ listId, group, count }: Props) {
           onChange={(e) => setName(e.target.value)}
           onBlur={onRename}
           onKeyDown={(e) => { if (e.key === 'Enter') onRename(); if (e.key === 'Escape') { setName(group.name); setEditing(false); }}}
+          onPointerDown={(e) => e.stopPropagation()}
           className="flex-1 rounded-md border bg-background p-1 text-sm"
         />
       ) : (
-        <button className="flex-1 text-left font-semibold" onClick={() => setEditing(true)}>
+        <button
+          className="flex-1 text-left font-semibold"
+          onClick={() => setEditing(true)}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {group.name}
         </button>
       )}
       <span className="text-xs text-muted-foreground">{count}</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost" aria-label="Group actions">
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="Group actions"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
