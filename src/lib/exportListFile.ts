@@ -12,9 +12,17 @@ export function exportListFile(list: List, deck: Deck): void {
   try {
     const today = new Date().toISOString().slice(0, 10);
     const md = exportListToMarkdown(list, deck, today);
-    const slug = list.name.replace(/[^\w-]+/g, '-').toLowerCase();
+    const slug = slugify(list.name);
     downloadTextFile(`${slug}-${today}.md`, md);
   } catch {
     toast.error("Couldn't start download.");
   }
+}
+
+function slugify(name: string): string {
+  const cleaned = name
+    .replace(/[^\w-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
+  return cleaned || 'list';
 }
