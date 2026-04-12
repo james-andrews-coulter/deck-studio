@@ -2467,6 +2467,47 @@ export function CardDetailSheet({ listId }: Props) {
 }
 ```
 
+- [ ] **Step 1b: Inline rename heading helper**
+
+Add inside `src/components/CardDetailSheet.tsx` — or a new small file `src/components/InlineRenameHeading.tsx`:
+
+```tsx
+import { useState } from 'react';
+
+type Props = { value: string; onChange: (next: string) => void };
+
+export function InlineRenameHeading({ value, onChange }: Props) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        className="rounded-md border bg-background px-2 py-1 text-xl font-semibold"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => { if (draft.trim()) onChange(draft.trim()); setEditing(false); }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') { if (draft.trim()) onChange(draft.trim()); setEditing(false); }
+          if (e.key === 'Escape') { setDraft(value); setEditing(false); }
+        }}
+      />
+    );
+  }
+  return (
+    <button className="text-left text-xl font-semibold hover:underline" onClick={() => { setDraft(value); setEditing(true); }}>
+      {value}
+    </button>
+  );
+}
+```
+
+Import it at the top of `ListScreen.tsx`:
+
+```tsx
+import { InlineRenameHeading } from '@/components/InlineRenameHeading';
+```
+
 - [ ] **Step 2: Create `ListScreen.tsx` (base render; dnd-kit and gestures come in later tasks)**
 
 ```tsx
@@ -2495,8 +2536,11 @@ export default function ListScreen() {
 
   return (
     <div className="p-4 md:p-6">
-      <header>
-        <h2 className="text-xl font-semibold">{list.name}</h2>
+      <header className="flex items-center gap-2">
+        <InlineRenameHeading
+          value={list.name}
+          onChange={(next) => useAppStore.getState().renameList(list.id, next)}
+        />
       </header>
 
       {list.groups.map((g) => {
@@ -3807,6 +3851,13 @@ git commit -m "Add Playwright E2E coverage for import→list→export and swipe 
 - [ ] Re-importing the same deck (same IDs) rehydrates the list's card rows
 
 ---
+
+## Known deviations from spec (v1)
+
+Two spec items are intentionally deferred in this plan to keep v1 shippable:
+
+- **§7.6 Drag-to-reorder groups** — the `reorderGroups` store action exists (Task 6) but no UI is wired. Group reorder is available in a future iteration; implement via a second `DndContext` over group headers or a "Move up / Move down" menu item when needed.
+- **§9 "Reset app" escape hatch with `Type RESET to confirm`** — the error boundary in Task 18 offers a reload only. Add the full reset path if store corruption turns out to be a real failure mode in the field.
 
 ## Out of scope for this plan
 
