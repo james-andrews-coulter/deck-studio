@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { toast } from 'sonner';
 import { createDecksSlice, type DecksSlice } from './decksSlice';
 import { createListsSlice, type ListsSlice } from './listsSlice';
 import { createUiSlice, type UISlice } from './uiSlice';
@@ -24,9 +25,7 @@ export const useAppStore = create<AppState>()(
       onRehydrateStorage: () => (_state, err) => {
         if (err) {
           queueMicrotask(() => {
-            import('sonner').then(({ toast }) => {
-              toast.error("Couldn't load saved data. Your work is safe but not restored.");
-            });
+            toast.error("Couldn't load saved data. Your work is safe but not restored.");
           });
         }
       },

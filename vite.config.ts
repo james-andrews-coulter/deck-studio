@@ -7,4 +7,20 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          dnd: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          radix: [
+            '@radix-ui/react-slot',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+          ],
+          motion: ['framer-motion'],
+        },
+      },
+    },
+  },
 });
