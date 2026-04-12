@@ -1,0 +1,135 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppStore } from '@/store';
+import { Button } from './ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from './ui/sheet';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from './ui/dialog';
+
+export function DeckDetailSheet() {
+  const deckId = useAppStore((s) => s.ui.activeDeckDetail);
+  const setDeckDetail = useAppStore((s) => s.setDeckDetail);
+  const deck = useAppStore((s) => (deckId ? s.decks[deckId] : undefined));
+  const referencingListCount = useAppStore((s) =>
+    deckId ? Object.values(s.lists).filter((l) => l.deckId === deckId).length : 0,
+  );
+  const createList = useAppStore((s) => s.createList);
+  const deleteDeck = useAppStore((s) => s.deleteDeck);
+  const navigate = useNavigate();
+
+  const [listName, setListName] = useState('');
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+
+  const open = !!deckId && !!deck;
+
+  // Reset the inline name input whenever the sheet opens for a different deck
+  useEffect(() => {
+    if (deckId) setListName('');
+  }, [deckId]);
+
+  const closeSheet = () => setDeckDetail(null);
+
+  const onCreateList = () => {
+    if (!deckId || !listName.trim()) return;
+    const newListId = createList(deckId, listName.trim());
+    closeSheet();
+    navigate(`/lists/${newListId}`);
+  };
+
+  const onConfigure = () => {
+    if (!deckId) return;
+    closeSheet();
+    navigate(`/decks/${deckId}/configure`);
+  };
+
+  const onDeleteConfirmed = () => {
+    if (!deckId) return;
+    deleteDeck(deckId);
+    setConfirmDeleteOpen(false);
+    closeSheet();
+  };
+
+  return (
+    <>
+      <Sheet open={open} onOpenChange={(o) => !o && closeSheet()}>
+        <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{deck?.name ?? 'Deck'}</SheetTitle>
+            <SheetDescription>
+              {deck ? `${deck.cards.length} ${deck.cards.length === 1 ? 'card' : 'cards'}` : ''}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">
+                Create a new list from this deck
+                <input
+                  className="mt-1 w-full rounded-md border bg-background p-2 text-sm"
+                  value={listName}
+                  onChange={(e) => setListName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') onCreateList();
+                  }}
+                  placeholder="List name"
+                />
+              </label>
+              <Button onClick={onCreateList} disabled={!listName.trim()}>
+                Create list
+              </Button>
+            </div>
+
+            <div className="border-t pt-3 space-y-2">
+              <Button variant="outline" className="w-full" onClick={onConfigure}>
+                Re-configure mapping
+              </Button>
+              {/* View all cards — deferred for v1 (spec §6.2) */}
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={() => setConfirmDeleteOpen(true)}
+              >
+                Delete deck
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this deck?</DialogTitle>
+            <DialogDescription>
+              {referencingListCount > 0
+                ? `${referencingListCount} ${
+                    referencingListCount === 1 ? 'list references' : 'lists reference'
+                  } this deck and will lose their source.`
+                : 'No lists reference this deck.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={onDeleteConfirmed}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

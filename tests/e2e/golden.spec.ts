@@ -10,8 +10,8 @@ test('import, create list, export markdown', async ({ page }) => {
   await page.getByRole('button', { name: /import deck/i }).click();
   await page.setInputFiles('input[type=file]', path.join(__dirname, 'fixtures/sample.json'));
 
-  // pre-mapped, navigates back; deck link visible on Decks screen
-  await expect(page.getByRole('link', { name: /E2E Deck/ })).toBeVisible();
+  // pre-mapped, navigates back; deck row (now a button) visible on Decks screen
+  await expect(page.getByRole('button', { name: /E2E Deck/ })).toBeVisible();
 
   // Create list
   await page.getByRole('link', { name: /^lists$/i }).click();

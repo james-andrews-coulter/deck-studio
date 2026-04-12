@@ -39,6 +39,6 @@ describe('DecksScreen', () => {
     });
     renderScreen();
     expect(screen.getByText('Test')).toBeInTheDocument();
-    expect(screen.getByText(/1 cards/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 card /i)).toBeInTheDocument();
   });
 });

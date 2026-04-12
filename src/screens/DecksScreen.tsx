@@ -1,11 +1,12 @@
-import { Link } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/store';
 import { EmptyState } from '@/components/EmptyState';
 import { ImportDeckButton } from '@/components/ImportDeckButton';
+import { DeckDetailSheet } from '@/components/DeckDetailSheet';
 
 export default function DecksScreen() {
   const decks = useAppStore(useShallow((s) => Object.values(s.decks)));
+  const setDeckDetail = useAppStore((s) => s.setDeckDetail);
   return (
     <div className="p-4 md:p-6">
       <header className="flex items-center justify-between">
@@ -27,19 +28,23 @@ export default function DecksScreen() {
         <ul className="mt-4 divide-y rounded-md border">
           {decks.map((d) => (
             <li key={d.id}>
-              <Link
-                to={`/decks/${d.id}`}
-                className="flex items-center justify-between p-3 hover:bg-muted"
+              <button
+                type="button"
+                onClick={() => setDeckDetail(d.id)}
+                className="flex w-full items-center justify-between p-3 text-left hover:bg-muted"
               >
                 <span className="font-medium">{d.name}</span>
                 <span className="text-xs text-muted-foreground">
-                  {d.cards.length} cards · {new Date(d.importedAt).toLocaleDateString()}
+                  {d.cards.length} {d.cards.length === 1 ? 'card' : 'cards'} ·{' '}
+                  {new Date(d.importedAt).toLocaleDateString()}
                 </span>
-              </Link>
+              </button>
             </li>
           ))}
         </ul>
       )}
+
+      <DeckDetailSheet />
     </div>
   );
 }
