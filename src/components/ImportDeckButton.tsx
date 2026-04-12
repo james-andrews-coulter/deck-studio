@@ -12,6 +12,7 @@ import {
 } from './ui/dialog';
 import { parseDeck, ImportError } from '@/lib/importer';
 import { useAppStore } from '@/store';
+import { hasShownFirstImport, markFirstImportShown } from '@/lib/firstRun';
 
 export function ImportDeckButton() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,8 +32,13 @@ export function ImportDeckButton() {
       if (parsed.warnings.includes('duplicate_ids')) {
         toast.warning('Some duplicate card IDs were removed.');
       }
+      const isFirstImport = !hasShownFirstImport();
+      if (isFirstImport) markFirstImportShown();
       if (parsed.skippedMapping) {
         toast.success(`Imported "${parsed.name}" (${parsed.cards.length} cards)`);
+        if (isFirstImport) {
+          toast.message('Now create a list from your deck to start curating.', { duration: 6000 });
+        }
         navigate('/decks');
       } else {
         if (parsed.warnings.includes('preconfigured_title_unresolved')) {
