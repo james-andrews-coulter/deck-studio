@@ -51,6 +51,12 @@ export default function ListsScreen() {
     return counts;
   }, [lists]);
 
+  const decksById = useMemo(() => {
+    const map: Record<string, (typeof decks)[number]> = {};
+    for (const d of decks) map[d.id] = d;
+    return map;
+  }, [decks]);
+
   const onCreate = () => {
     if (!wizardDeckId || !wizardName.trim()) return;
     const id = createList(wizardDeckId, wizardName.trim());
@@ -83,7 +89,7 @@ export default function ListsScreen() {
       ) : (
         <ul className="mt-4 divide-y divide-border/60 rounded-md border">
           {lists.map((l) => {
-            const deck = useAppStore.getState().decks[l.deckId];
+            const deck = decksById[l.deckId];
             const c = visibleCount[l.id];
             return (
               <li key={l.id} className="flex items-center">
