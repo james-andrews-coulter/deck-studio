@@ -129,7 +129,7 @@ type CardRef = {
 ```
 
 ### 5.1 Group color palette
-Six preset swatches plus a neutral default. Values are Tailwind class roots the UI maps to badges/headers:
+Six preset swatches. `slate` is the neutral default assigned to newly-created groups. Values are Tailwind class roots the UI maps to badges/headers:
 
 ```ts
 type GroupColor = 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'violet';
@@ -182,7 +182,7 @@ The active tab is derived from the URL. Back navigation uses native browser back
 
 ### 6.4 Lists tab (`/lists`)
 - Scrollable list rows: name, source deck name, updated date, `{visible}/{total}` card count
-- Primary action `+ New list` → deck picker → name dialog → opens list view (starts with all cards ungrouped in imported order)
+- Primary action `+ New list` → deck picker → name dialog → opens list view. **Initial population rule:** one `CardRef` per card in the chosen deck, each with `groupId: null`, `hidden: false`, in the deck's imported card order. `groups` starts as `[]`.
 - Row context menu (overflow button / long-press on mobile): *Rename*, *Duplicate*, *Export as markdown*, *Delete*
 
 ### 6.5 List view (`/lists/:listId`) — main workspace
@@ -237,6 +237,7 @@ The active tab is derived from the URL. Back navigation uses native browser back
   - Above threshold: animate off-screen (300ms ease-out), commit the action, advance the stack
 - The next card pre-renders behind the top card at `scale: 0.95, opacity: 0.8` and animates to `1/1` as the top card commits
 - Undo: a single-step in-memory undo stack reverses the last commit; multi-step undo is out of scope for v1
+- The swipe undo stack is **distinct from** the shuffle undo stack (§7.3). They do not share state and do not interact.
 
 ### 7.3 Shuffle + undo
 - `shuffle(listId)` performs Fisher-Yates over `cardRefs` (hidden cards shuffle too — still hidden)
@@ -283,7 +284,7 @@ The active tab is derived from the URL. Back navigation uses native browser back
 2. Detect shape, in order:
    - Plain array → treat as `{ cards: [...] }`, deck name = filename sans `.json`
    - Object with `cards` array → use `name` if present, else filename
-   - Object with `fieldMapping` pre-set → skip mapping UI
+   - Object with `fieldMapping` pre-set → validate that `fieldMapping.title` resolves to a key present in at least one card; if not, fall through to the mapping UI with a warning toast. On success, skip the mapping UI.
 3. For each card: assign `id` = `card.id` if present, else `uuid v4`. Warn and dedupe if duplicate IDs within the same deck (keep first occurrence, drop later).
 4. Detect schema = union of all keys across all cards — this feeds the mapping UI.
 5. Route to mapping screen if no mapping is pre-configured.
@@ -373,7 +374,7 @@ Mapping edits are reactive — all lists derived from that deck update card rend
 | Duplicate card IDs | Non-blocking toast: `N duplicates removed` | Import proceeds |
 | IDB write failure (quota) | Dialog with export/delete guidance | User frees space |
 | Store hydration failure on load | Dialog: `Couldn't load saved data.` + *Reset app* button (guarded with a `Type RESET to confirm` input) | User resets or reloads |
-| List references a deleted deck | List renders with header warning + card rows render as `Missing card` | User re-imports the deck or deletes the list |
+| List references a deleted deck | Lists survive deck deletion; the list view renders a header warning and every `CardRef` resolves to a `Missing card` placeholder row | User re-imports the deck (existing IDs rehydrate) or deletes the list |
 | Markdown download failure | Toast: `Couldn't start download.` | User retries |
 | Drag into a just-deleted group | No-op, drop returns card to source | — |
 
