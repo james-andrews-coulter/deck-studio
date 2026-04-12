@@ -1,0 +1,53 @@
+export type GroupColor = 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'violet';
+
+export type FieldMapping = {
+  title: string;
+  subtitle?: string;
+  body?: string;
+  image?: string;
+  meta?: string[];
+};
+
+export type Card = {
+  id: string;
+  fields: Record<string, unknown>;
+};
+
+export type Deck = {
+  id: string;
+  name: string;
+  importedAt: string;
+  fieldMapping: FieldMapping;
+  cards: Card[];
+};
+
+export type Group = {
+  id: string;
+  name: string;
+  color: GroupColor;
+};
+
+export type CardRef = {
+  cardId: string;
+  hidden: boolean;
+  groupId: string | null;
+};
+
+export type List = {
+  id: string;
+  name: string;
+  deckId: string;
+  createdAt: string;
+  updatedAt: string;
+  groups: Group[];
+  cardRefs: CardRef[];
+};
+
+export type ResolvedCard = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  body?: string;
+  image?: string;
+  meta: Array<{ key: string; value: string }>;
+};
