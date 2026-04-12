@@ -22,6 +22,7 @@ import { DrawCardDialog } from '@/components/DrawCardDialog';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
+import { ListMenu } from '@/components/ListMenu';
 import { Button } from '@/components/ui/button';
 
 export default function ListScreen() {
@@ -102,6 +103,7 @@ export default function ListScreen() {
         >
           + Group
         </Button>
+        <ListMenu listId={list.id} />
       </header>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
