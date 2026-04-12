@@ -18,6 +18,7 @@ import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { CardDetailSheet } from '@/components/CardDetailSheet';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
+import { DrawCardDialog } from '@/components/DrawCardDialog';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
@@ -33,6 +34,7 @@ export default function ListScreen() {
   const setCardRefs = useAppStore((s) => s.setCardRefs);
   const moveCardToGroupAt = useAppStore((s) => s.moveCardToGroupAt);
   const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
+  const setDrawOpen = useAppStore((s) => s.setDrawCardOpen);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -177,6 +179,15 @@ export default function ListScreen() {
 
       <CardDetailSheet listId={list.id} />
       <HiddenCardsSheet listId={list.id} />
+
+      <button
+        aria-label="Draw a random card"
+        onClick={() => setDrawOpen(true)}
+        className="fixed bottom-20 right-4 z-20 rounded-full bg-primary px-5 py-3 text-primary-foreground shadow-lg md:bottom-8"
+      >
+        🎲 Draw
+      </button>
+      <DrawCardDialog listId={list.id} />
     </div>
   );
 }
