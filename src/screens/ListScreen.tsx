@@ -186,7 +186,7 @@ export default function ListScreen() {
           value={list.name}
           onChange={(next) => useAppStore.getState().renameList(list.id, next)}
         />
-        {hiddenCount > 0 && (
+        {mode === 'view' && hiddenCount > 0 && (
           <button
             onClick={() => setHiddenSheetOpen(true)}
             aria-label="Show hidden cards"
@@ -195,33 +195,34 @@ export default function ListScreen() {
             {hiddenCount} hidden
           </button>
         )}
-        {groupDraft === null ? (
-          <Button
-            size="sm"
-            variant="outline"
-            className={hiddenCount > 0 ? '' : 'ml-auto'}
-            onClick={() => setGroupDraft('New group')}
-          >
-            + Group
-          </Button>
-        ) : (
-          <input
-            autoFocus
-            value={groupDraft}
-            onChange={(e) => setGroupDraft(e.target.value)}
-            onBlur={commitNewGroup}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') commitNewGroup();
-              if (e.key === 'Escape') setGroupDraft(null);
-            }}
-            aria-label="New group name"
-            className={cn(
-              'rounded-md border bg-background px-2 py-1 text-sm',
-              hiddenCount > 0 ? '' : 'ml-auto',
-            )}
-          />
-        )}
-        <div className="ml-2 inline-flex rounded-md border p-0.5 text-xs">
+        {mode === 'view' &&
+          (groupDraft === null ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className={hiddenCount > 0 ? '' : 'ml-auto'}
+              onClick={() => setGroupDraft('New group')}
+            >
+              + Group
+            </Button>
+          ) : (
+            <input
+              autoFocus
+              value={groupDraft}
+              onChange={(e) => setGroupDraft(e.target.value)}
+              onBlur={commitNewGroup}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') commitNewGroup();
+                if (e.key === 'Escape') setGroupDraft(null);
+              }}
+              aria-label="New group name"
+              className={cn(
+                'rounded-md border bg-background px-2 py-1 text-sm',
+                hiddenCount > 0 ? '' : 'ml-auto',
+              )}
+            />
+          ))}
+        <div className={cn('inline-flex rounded-md border p-0.5 text-xs', mode === 'swipe' && 'ml-auto')}>
           <button
             className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
             onClick={() => setMode('view')}
