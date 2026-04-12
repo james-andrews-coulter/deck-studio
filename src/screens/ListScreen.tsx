@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   DndContext,
@@ -6,6 +6,7 @@ import {
   TouchSensor,
   KeyboardSensor,
   closestCenter,
+  useDroppable,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -26,6 +27,27 @@ import { ListMenu } from '@/components/ListMenu';
 import { SwipeSession } from '@/components/SwipeSession';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+const UNGROUPED_DROP_ID = '__ungrouped__';
+
+function GroupDropZone({
+  groupId,
+  children,
+}: {
+  groupId: string | null;
+  children: ReactNode;
+}) {
+  const droppableId = groupId ?? UNGROUPED_DROP_ID;
+  const { setNodeRef, isOver } = useDroppable({ id: `group:${droppableId}` });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn('rounded-md', isOver && 'bg-muted/40 ring-2 ring-foreground/20')}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function ListScreen() {
   const { listId = '' } = useParams();
@@ -97,8 +119,18 @@ export default function ListScreen() {
     const { active, over } = evt;
     if (!over || active.id === over.id) return;
     const activeRef = list.cardRefs.find((r) => r.cardId === active.id);
-    const overRef = list.cardRefs.find((r) => r.cardId === over.id);
     if (!activeRef) return;
+
+    const overId = String(over.id);
+    if (overId.startsWith('group:')) {
+      const rawGroupId = overId.slice('group:'.length);
+      const targetGroupId = rawGroupId === UNGROUPED_DROP_ID ? null : rawGroupId;
+      if (activeRef.groupId === targetGroupId) return;
+      moveCardToGroupAt(list.id, String(active.id), targetGroupId, 0);
+      return;
+    }
+
+    const overRef = list.cardRefs.find((r) => r.cardId === over.id);
     const sameGroup = overRef && overRef.groupId === activeRef.groupId;
     if (sameGroup) {
       const from = list.cardRefs.findIndex((r) => r.cardId === active.id);
@@ -189,12 +221,59 @@ export default function ListScreen() {
             <section key={g.id} className="mt-4">
               <GroupHeader listId={list.id} group={g} count={rows.length} />
               {!collapsed[g.id] && (
-                <SortableContext
-                  items={rows.map((r) => r.cardId)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <ul className="mt-2 space-y-1.5">
-                    {rows.map((r) => {
+                <GroupDropZone groupId={g.id}>
+                  <SortableContext
+                    items={rows.map((r) => r.cardId)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {rows.length === 0 ? (
+                      <div className="py-4 text-center text-xs text-muted-foreground">
+                        Drop cards here
+                      </div>
+                    ) : (
+                      <ul className="mt-2 space-y-1.5">
+                        {rows.map((r) => {
+                          const card = deck.cards.find((c) => c.id === r.cardId);
+                          return (
+                            <SortableCard key={r.cardId} id={r.cardId}>
+                              {card ? (
+                                <CardView card={card} mapping={deck.fieldMapping} />
+                              ) : (
+                                <div className="rounded border p-2 text-sm italic text-muted-foreground">
+                                  Missing card
+                                </div>
+                              )}
+                            </SortableCard>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </SortableContext>
+                </GroupDropZone>
+              )}
+            </section>
+          );
+        })}
+
+        {(list.groups.length > 0 || ungroupedRows.length > 0) && (
+          <section className="mt-4">
+            {list.groups.length > 0 && (
+              <h3 className="mb-2 text-sm font-semibold uppercase text-muted-foreground">
+                (Ungrouped)
+              </h3>
+            )}
+            <GroupDropZone groupId={null}>
+              <SortableContext
+                items={ungroupedRows.map((r) => r.cardId)}
+                strategy={verticalListSortingStrategy}
+              >
+                {ungroupedRows.length === 0 ? (
+                  <div className="py-4 text-center text-xs text-muted-foreground">
+                    Drop cards here
+                  </div>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {ungroupedRows.map((r) => {
                       const card = deck.cards.find((c) => c.id === r.cardId);
                       return (
                         <SortableCard key={r.cardId} id={r.cardId}>
@@ -209,36 +288,9 @@ export default function ListScreen() {
                       );
                     })}
                   </ul>
-                </SortableContext>
-              )}
-            </section>
-          );
-        })}
-
-        {ungroupedRows.length > 0 && (
-          <section className="mt-4">
-            <h3 className="mb-2 text-sm font-semibold uppercase text-muted-foreground">(Ungrouped)</h3>
-            <SortableContext
-              items={ungroupedRows.map((r) => r.cardId)}
-              strategy={verticalListSortingStrategy}
-            >
-              <ul className="space-y-1.5">
-                {ungroupedRows.map((r) => {
-                  const card = deck.cards.find((c) => c.id === r.cardId);
-                  return (
-                    <SortableCard key={r.cardId} id={r.cardId}>
-                      {card ? (
-                        <CardView card={card} mapping={deck.fieldMapping} />
-                      ) : (
-                        <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                          Missing card
-                        </div>
-                      )}
-                    </SortableCard>
-                  );
-                })}
-              </ul>
-            </SortableContext>
+                )}
+              </SortableContext>
+            </GroupDropZone>
           </section>
         )}
       </DndContext>
