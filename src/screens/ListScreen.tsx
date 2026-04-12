@@ -29,6 +29,13 @@ import { SwipeSession } from '@/components/SwipeSession';
 import { SwipeableRow } from '@/components/SwipeableRow';
 import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 const UNGROUPED_DROP_ID = '__ungrouped__';
@@ -93,6 +100,10 @@ export default function ListScreen() {
   const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
 
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
+  const [pendingAutoGroup, setPendingAutoGroup] = useState<{
+    cardIds: [string, string];
+    name: string;
+  } | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
   const toggleSelect = (cardId: string) =>
@@ -165,6 +176,17 @@ export default function ListScreen() {
   const refsByGroup = (gid: string | null) =>
     list.cardRefs.filter((r) => r.groupId === gid && !r.hidden);
 
+  const commitAutoGroup = () => {
+    if (!pendingAutoGroup) return;
+    const { cardIds, name } = pendingAutoGroup;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const newId = addGroup(list!.id, trimmed);
+    moveCardToGroup(list!.id, cardIds[0], newId);
+    moveCardToGroup(list!.id, cardIds[1], newId);
+    setPendingAutoGroup(null);
+  };
+
   const onDragEnd = (evt: DragEndEvent) => {
     const { active, over } = evt;
     if (!over || active.id === over.id) return;
@@ -196,6 +218,19 @@ export default function ListScreen() {
     }
 
     const overRef = list.cardRefs.find((r) => r.cardId === over.id);
+
+    // Auto-group: when two ungrouped cards are dropped onto each other, prompt
+    // the user to create a new group containing both. Must run before the
+    // standard same-group / cross-group branches and return early so they
+    // don't also fire.
+    if (activeRef.groupId === null && overRef && overRef.groupId === null) {
+      setPendingAutoGroup({
+        cardIds: [String(active.id), String(over.id)],
+        name: 'New group',
+      });
+      return;
+    }
+
     const sameGroup = overRef && overRef.groupId === activeRef.groupId;
     if (sameGroup) {
       const from = list.cardRefs.findIndex((r) => r.cardId === active.id);
@@ -411,6 +446,41 @@ export default function ListScreen() {
           clearSelection();
         }}
       />
+      <Dialog
+        open={!!pendingAutoGroup}
+        onOpenChange={(o) => !o && setPendingAutoGroup(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Group these cards?</DialogTitle>
+          </DialogHeader>
+          <input
+            autoFocus
+            className="w-full rounded-md border bg-background p-2 text-sm"
+            value={pendingAutoGroup?.name ?? ''}
+            onChange={(e) =>
+              setPendingAutoGroup((p) => (p ? { ...p, name: e.target.value } : p))
+            }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitAutoGroup();
+              if (e.key === 'Escape') setPendingAutoGroup(null);
+            }}
+            placeholder="Group name"
+            aria-label="Group name"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingAutoGroup(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={commitAutoGroup}
+              disabled={!pendingAutoGroup?.name.trim()}
+            >
+              Create group
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {selectMode && selected.size > 0 && (
         <div className="fixed inset-x-0 bottom-14 z-20 mx-auto flex max-w-md items-center justify-between gap-2 rounded-full border bg-background p-2 shadow-lg md:bottom-4">
