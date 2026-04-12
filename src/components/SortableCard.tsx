@@ -15,15 +15,15 @@ export function SortableCard({ id, children, leading }: Props) {
   return (
     <li ref={setNodeRef} style={style} {...attributes} className="flex items-stretch gap-1">
       {leading}
+      <div className="flex-1 min-w-0">{children}</div>
       <button
         type="button"
         aria-label="Drag to reorder"
-        className="flex h-auto w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted touch-none"
+        className="flex h-auto w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted touch-none"
         {...listeners}
       >
         <GripVertical className="h-4 w-4" />
       </button>
-      <div className="flex-1 min-w-0">{children}</div>
     </li>
   );
 }
