@@ -30,10 +30,15 @@ export function HiddenCardsSheet({ listId }: Props) {
         <ul className="mt-3 space-y-2">
           {hiddenRefs.map((r) => {
             const card = deck.cards.find((c) => c.id === r.cardId);
-            if (!card) return null;
             return (
               <li key={r.cardId} className="flex items-center gap-2">
-                <div className="flex-1"><CardView card={card} mapping={deck.fieldMapping} /></div>
+                <div className="flex-1">
+                  {card ? (
+                    <CardView card={card} mapping={deck.fieldMapping} />
+                  ) : (
+                    <div className="rounded border p-2 text-sm italic text-muted-foreground">Missing card</div>
+                  )}
+                </div>
                 <Button size="sm" onClick={() => setHidden(listId, r.cardId, false)}>Restore</Button>
               </li>
             );
