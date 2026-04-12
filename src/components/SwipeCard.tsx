@@ -38,7 +38,7 @@ export function SwipeCard({ card, mapping, onCommit }: Props) {
           animate(x, 0, { type: 'spring', stiffness: 300 });
         }
       }}
-      className="relative mx-auto w-full max-w-sm aspect-[3/4]"
+      className="relative mx-auto aspect-[3/4] w-[min(24rem,calc(100vw-2rem))]"
       data-testid="swipe-card"
     >
       <motion.div
@@ -53,7 +53,7 @@ export function SwipeCard({ card, mapping, onCommit }: Props) {
         <CardView
           card={card}
           mapping={mapping}
-          className="h-full flex flex-col justify-center"
+          className="h-full flex flex-col justify-center items-start"
         />
       </div>
     </motion.div>
