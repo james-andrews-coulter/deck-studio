@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import {
   DndContext,
   PointerSensor,
@@ -23,7 +23,9 @@ import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
 import { ListMenu } from '@/components/ListMenu';
+import { SwipeSession } from '@/components/SwipeSession';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export default function ListScreen() {
   const { listId = '' } = useParams();
@@ -36,6 +38,14 @@ export default function ListScreen() {
   const moveCardToGroupAt = useAppStore((s) => s.moveCardToGroupAt);
   const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
   const setDrawOpen = useAppStore((s) => s.setDrawCardOpen);
+
+  const [params, setParams] = useSearchParams();
+  const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
+  const setMode = (m: 'view' | 'swipe') =>
+    setParams((p) => {
+      p.set('mode', m);
+      return p;
+    });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -103,9 +113,27 @@ export default function ListScreen() {
         >
           + Group
         </Button>
+        <div className="ml-2 inline-flex rounded-md border p-0.5 text-xs">
+          <button
+            className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
+            onClick={() => setMode('view')}
+          >
+            View
+          </button>
+          <button
+            className={cn('px-2 py-1', mode === 'swipe' && 'bg-muted')}
+            onClick={() => setMode('swipe')}
+          >
+            Swipe
+          </button>
+        </div>
         <ListMenu listId={list.id} />
       </header>
 
+      {mode === 'swipe' ? (
+        <SwipeSession listId={list.id} onDone={() => setMode('view')} />
+      ) : (
+        <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         {list.groups.map((g) => {
           const rows = refsByGroup(g.id);
@@ -190,6 +218,8 @@ export default function ListScreen() {
         🎲 Draw
       </button>
       <DrawCardDialog listId={list.id} />
+        </>
+      )}
     </div>
   );
 }
