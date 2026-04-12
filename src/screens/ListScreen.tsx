@@ -17,6 +17,7 @@ import {
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { CardDetailSheet } from '@/components/CardDetailSheet';
+import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
@@ -31,6 +32,7 @@ export default function ListScreen() {
   const collapsed = useAppStore((s) => s.ui.collapsedGroups);
   const setCardRefs = useAppStore((s) => s.setCardRefs);
   const moveCardToGroupAt = useAppStore((s) => s.moveCardToGroupAt);
+  const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -40,6 +42,8 @@ export default function ListScreen() {
 
   if (!list) return <div className="p-6">List not found.</div>;
   if (!deck) return <div className="p-6">This list's deck is missing. Re-import it or delete the list.</div>;
+
+  const hiddenCount = list.cardRefs.filter((r) => r.hidden).length;
 
   const refsByGroup = (gid: string | null) =>
     list.cardRefs.filter((r) => r.groupId === gid && !r.hidden);
@@ -77,10 +81,18 @@ export default function ListScreen() {
           value={list.name}
           onChange={(next) => useAppStore.getState().renameList(list.id, next)}
         />
+        {hiddenCount > 0 && (
+          <button
+            onClick={() => setHiddenSheetOpen(true)}
+            className="ml-auto rounded-full bg-muted px-3 py-1 text-xs"
+          >
+            {hiddenCount} hidden
+          </button>
+        )}
         <Button
           size="sm"
           variant="outline"
-          className="ml-auto"
+          className={hiddenCount > 0 ? '' : 'ml-auto'}
           onClick={() => {
             const name = prompt('Group name', 'New group');
             if (name && name.trim()) addGroup(list.id, name.trim());
@@ -164,6 +176,7 @@ export default function ListScreen() {
       </DndContext>
 
       <CardDetailSheet listId={list.id} />
+      <HiddenCardsSheet listId={list.id} />
     </div>
   );
 }
