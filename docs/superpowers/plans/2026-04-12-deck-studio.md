@@ -3858,6 +3858,13 @@ Two spec items are intentionally deferred in this plan to keep v1 shippable:
 
 - **§7.6 Drag-to-reorder groups** — the `reorderGroups` store action exists (Task 6) but no UI is wired. Group reorder is available in a future iteration; implement via a second `DndContext` over group headers or a "Move up / Move down" menu item when needed.
 - **§9 "Reset app" escape hatch with `Type RESET to confirm`** — the error boundary in Task 18 offers a reload only. Add the full reset path if store corruption turns out to be a real failure mode in the field.
+- **§6.2 "View all cards"** inside the deck detail sheet — not implemented (Create list / Re-configure mapping / Delete deck are).
+- **§5.3 debounced IDB writes (200ms)** — writes are synchronous via Zustand's `persist`. Defer unless write contention becomes measurable.
+- **§7.1 `onDragOver` + empty-group drop targets** — empty groups are not valid drop targets. Defer.
+- **§7.2 "next card peek" scale animation** — top card commits, next card renders without a scale transition. Defer.
+- **§7.7 skip-to-content link** — not implemented. Defer.
+- **§6.8 first-run "Now create a list from your deck" toast** — not implemented. Defer.
+- **Dark-mode toggle** — `darkMode: 'class'` is configured and a few components use `dark:` classes, but there is no toggle UI. Defer.
 
 ## Out of scope for this plan
 
