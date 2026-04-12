@@ -38,7 +38,7 @@ export function SwipeCard({ card, mapping, onCommit }: Props) {
           animate(x, 0, { type: 'spring', stiffness: 300 });
         }
       }}
-      className="relative"
+      className="relative mx-auto w-full max-w-sm aspect-[3/4]"
       data-testid="swipe-card"
     >
       <motion.div
@@ -49,7 +49,13 @@ export function SwipeCard({ card, mapping, onCommit }: Props) {
         style={{ opacity: discardOpacity }}
         className="pointer-events-none absolute inset-0 rounded-xl bg-rose-500/20"
       />
-      <CardView card={card} mapping={mapping} />
+      <div className="h-full">
+        <CardView
+          card={card}
+          mapping={mapping}
+          className="h-full flex flex-col justify-center"
+        />
+      </div>
     </motion.div>
   );
 }
