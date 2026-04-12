@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   DndContext,
@@ -6,18 +6,15 @@ import {
   TouchSensor,
   KeyboardSensor,
   closestCenter,
-  useDroppable,
   useSensor,
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
-  useSortable,
   verticalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
@@ -30,6 +27,8 @@ import { SwipeableRow } from '@/components/SwipeableRow';
 import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
 import { SelectionActionBar } from '@/components/SelectionActionBar';
 import { GroupNameInput } from '@/components/GroupNameInput';
+import { GroupDropZone } from '@/components/GroupDropZone';
+import { SortableGroupSection } from '@/components/SortableGroupSection';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -38,55 +37,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-
-const UNGROUPED_DROP_ID = '__ungrouped__';
-
-function GroupDropZone({
-  groupId,
-  children,
-}: {
-  groupId: string | null;
-  children: ReactNode;
-}) {
-  const droppableId = groupId ?? UNGROUPED_DROP_ID;
-  const { setNodeRef, isOver } = useDroppable({ id: `group:${droppableId}` });
-  return (
-    <div
-      ref={setNodeRef}
-      className={cn('rounded-md', isOver && 'bg-muted/40 ring-2 ring-foreground/20')}
-    >
-      {children}
-    </div>
-  );
-}
-
-const GROUP_HEADER_PREFIX = 'groupheader:';
-
-function SortableGroupSection({
-  groupId,
-  children,
-}: {
-  groupId: string;
-  children: (headerDragHandle: React.HTMLAttributes<HTMLDivElement>) => ReactNode;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: `${GROUP_HEADER_PREFIX}${groupId}`,
-  });
-  const style: CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-  };
-  const handleProps: React.HTMLAttributes<HTMLDivElement> = {
-    ...attributes,
-    ...(listeners as React.HTMLAttributes<HTMLDivElement>),
-  };
-  return (
-    <section ref={setNodeRef} style={style} className="mt-4">
-      {children(handleProps)}
-    </section>
-  );
-}
+import {
+  GROUP_DROP_PREFIX,
+  GROUP_HEADER_PREFIX,
+  UNGROUPED_DROP_ID,
+} from '@/lib/groupDnd';
 
 export default function ListScreen() {
   const { listId = '' } = useParams();
@@ -196,8 +151,8 @@ export default function ListScreen() {
     const activeRef = list.cardRefs.find((r) => r.cardId === activeId);
     if (!activeRef) return;
 
-    if (overId.startsWith('group:')) {
-      const rawGroupId = overId.slice('group:'.length);
+    if (overId.startsWith(GROUP_DROP_PREFIX)) {
+      const rawGroupId = overId.slice(GROUP_DROP_PREFIX.length);
       const targetGroupId = rawGroupId === UNGROUPED_DROP_ID ? null : rawGroupId;
       if (activeRef.groupId === targetGroupId) return;
       moveCardToGroupAt(list.id, activeId, targetGroupId, 0);
