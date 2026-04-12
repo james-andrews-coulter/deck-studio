@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
 import { useAppStore } from '@/store';
 import { exportListFile } from '@/lib/exportListFile';
@@ -37,6 +38,9 @@ export default function ListsScreen() {
   const [wizardDeckId, setWizardDeckId] = useState<string>('');
   const [wizardName, setWizardName] = useState('');
 
+  const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+
   const visibleCount = useMemo(() => {
     const counts: Record<string, { visible: number; total: number }> = {};
     for (const l of lists) {
@@ -53,6 +57,13 @@ export default function ListsScreen() {
     setWizardOpen(false);
     setWizardName('');
     navigate(`/lists/${id}`);
+  };
+
+  const commitRename = () => {
+    if (!renameTarget) return;
+    const trimmed = renameTarget.name.trim();
+    if (trimmed) renameList(renameTarget.id, trimmed);
+    setRenameTarget(null);
   };
 
   return (
@@ -91,10 +102,7 @@ export default function ListsScreen() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      onClick={() => {
-                        const name = prompt('Rename list', l.name);
-                        if (name && name.trim()) renameList(l.id, name.trim());
-                      }}
+                      onClick={() => setRenameTarget({ id: l.id, name: l.name })}
                     >
                       Rename
                     </DropdownMenuItem>
@@ -111,9 +119,7 @@ export default function ListsScreen() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600"
-                      onClick={() => {
-                        if (confirm(`Delete "${l.name}"?`)) deleteList(l.id);
-                      }}
+                      onClick={() => setDeleteTarget({ id: l.id, name: l.name })}
                     >
                       Delete
                     </DropdownMenuItem>
@@ -166,6 +172,47 @@ export default function ListsScreen() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!renameTarget} onOpenChange={(o) => !o && setRenameTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename list</DialogTitle>
+          </DialogHeader>
+          <input
+            autoFocus
+            className="w-full rounded-md border bg-background p-2 text-sm"
+            value={renameTarget?.name ?? ''}
+            onChange={(e) =>
+              setRenameTarget((t) => (t ? { ...t, name: e.target.value } : t))
+            }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitRename();
+              if (e.key === 'Escape') setRenameTarget(null);
+            }}
+            aria-label="List name"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenameTarget(null)}>
+              Cancel
+            </Button>
+            <Button onClick={commitRename} disabled={!renameTarget?.name.trim()}>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        title="Delete this list?"
+        description={deleteTarget ? `"${deleteTarget.name}" will be removed permanently.` : undefined}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => {
+          if (deleteTarget) deleteList(deleteTarget.id);
+        }}
+      />
     </div>
   );
 }

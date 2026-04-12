@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   DndContext,
@@ -46,6 +47,12 @@ export default function ListScreen() {
       p.set('mode', m);
       return p;
     });
+
+  const [groupDraft, setGroupDraft] = useState<string | null>(null);
+  const commitNewGroup = () => {
+    if (groupDraft && groupDraft.trim()) addGroup(list!.id, groupDraft.trim());
+    setGroupDraft(null);
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -124,22 +131,38 @@ export default function ListScreen() {
         {hiddenCount > 0 && (
           <button
             onClick={() => setHiddenSheetOpen(true)}
+            aria-label="Show hidden cards"
             className="ml-auto rounded-full bg-muted px-3 py-1 text-xs"
           >
             {hiddenCount} hidden
           </button>
         )}
-        <Button
-          size="sm"
-          variant="outline"
-          className={hiddenCount > 0 ? '' : 'ml-auto'}
-          onClick={() => {
-            const name = prompt('Group name', 'New group');
-            if (name && name.trim()) addGroup(list.id, name.trim());
-          }}
-        >
-          + Group
-        </Button>
+        {groupDraft === null ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className={hiddenCount > 0 ? '' : 'ml-auto'}
+            onClick={() => setGroupDraft('New group')}
+          >
+            + Group
+          </Button>
+        ) : (
+          <input
+            autoFocus
+            value={groupDraft}
+            onChange={(e) => setGroupDraft(e.target.value)}
+            onBlur={commitNewGroup}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitNewGroup();
+              if (e.key === 'Escape') setGroupDraft(null);
+            }}
+            aria-label="New group name"
+            className={cn(
+              'rounded-md border bg-background px-2 py-1 text-sm',
+              hiddenCount > 0 ? '' : 'ml-auto',
+            )}
+          />
+        )}
         <div className="ml-2 inline-flex rounded-md border p-0.5 text-xs">
           <button
             className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
