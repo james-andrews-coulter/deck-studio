@@ -17,4 +17,8 @@
   }
   html, body, #root { height: 100%; }
   body { @apply bg-background text-foreground antialiased; }
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+  }
 }
