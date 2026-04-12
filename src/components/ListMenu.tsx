@@ -10,8 +10,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { useAppStore } from '@/store';
-import { exportListToMarkdown } from '@/lib/markdownExporter';
-import { downloadTextFile } from '@/lib/download';
+import { exportListFile } from '@/lib/exportListFile';
 
 type Props = { listId: string };
 
@@ -39,10 +38,7 @@ export function ListMenu({ listId }: Props) {
 
   const onExport = () => {
     if (!deck) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const md = exportListToMarkdown(list, deck, today);
-    const slug = list.name.replace(/[^\w-]+/g, '-').toLowerCase();
-    downloadTextFile(`${slug}-${today}.md`, md);
+    exportListFile(list, deck);
   };
 
   const onDelete = () => {

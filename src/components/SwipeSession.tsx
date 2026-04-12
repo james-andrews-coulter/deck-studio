@@ -11,7 +11,12 @@ export function SwipeSession({ listId, onDone }: Props) {
   const setHidden = useAppStore((s) => s.setHidden);
 
   const initialQueue = useMemo(
-    () => (list ? list.cardRefs.filter((r) => !r.hidden).map((r) => r.cardId) : []),
+    () =>
+      list && deck
+        ? list.cardRefs
+            .filter((r) => !r.hidden && deck.cards.some((c) => c.id === r.cardId))
+            .map((r) => r.cardId)
+        : [],
     // Freeze queue at session start — intentionally do not depend on list.cardRefs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [listId],
@@ -41,11 +46,9 @@ export function SwipeSession({ listId, onDone }: Props) {
   }
 
   const cardId = initialQueue[index];
-  const card = deck.cards.find((c) => c.id === cardId);
-  if (!card) {
-    setIndex((i) => i + 1);
-    return null;
-  }
+  // initialQueue was filtered to only contain IDs that resolve in the deck, so
+  // `card` is guaranteed to be present for any queue position.
+  const card = deck.cards.find((c) => c.id === cardId)!;
 
   const commit = (dir: 'keep' | 'discard') => {
     if (dir === 'discard') {

@@ -54,7 +54,34 @@ export default function ListScreen() {
   );
 
   if (!list) return <div className="p-6">List not found.</div>;
-  if (!deck) return <div className="p-6">This list's deck is missing. Re-import it or delete the list.</div>;
+  if (!deck) {
+    return (
+      <div className="p-4 md:p-6">
+        <div
+          role="alert"
+          className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+        >
+          The deck that this list was created from is missing. Re-import the deck or delete this list.
+        </div>
+        <header className="flex items-center gap-2">
+          <InlineRenameHeading
+            value={list.name}
+            onChange={(n) => useAppStore.getState().renameList(list.id, n)}
+          />
+        </header>
+        <ul className="mt-4 space-y-2">
+          {list.cardRefs.map((r) => (
+            <li
+              key={r.cardId}
+              className="rounded border p-3 text-sm italic text-muted-foreground"
+            >
+              Missing card
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
   const hiddenCount = list.cardRefs.filter((r) => r.hidden).length;
 

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/EmptyState';
 import { useAppStore } from '@/store';
+import { exportListFile } from '@/lib/exportListFile';
 
 export default function ListsScreen() {
   const lists = useAppStore(
@@ -99,6 +100,14 @@ export default function ListsScreen() {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => duplicateList(l.id)}>
                       Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={!deck}
+                      onClick={() => {
+                        if (deck) exportListFile(l, deck);
+                      }}
+                    >
+                      Export as markdown
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600"
