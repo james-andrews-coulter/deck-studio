@@ -30,7 +30,7 @@ export function SwipeCard({ card, mapping, onCommit }: Props) {
       style={{ x, rotate }}
       drag="x"
       dragElastic={0.7}
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      dragConstraints={{ top: 0, bottom: 0 }}
       onDragEnd={(_, info) => {
         if (Math.abs(info.offset.x) > 100 || Math.abs(info.velocity.x) > 500) {
           commit(info.offset.x > 0 ? 'keep' : 'discard');

@@ -1,4 +1,4 @@
-import { Card as CardT, FieldMapping } from '@/lib/types';
+import type { Card as CardT, FieldMapping } from '@/lib/types';
 import { resolveCard } from '@/lib/cardFields';
 
 type Props = { card: CardT; mapping: FieldMapping; className?: string };

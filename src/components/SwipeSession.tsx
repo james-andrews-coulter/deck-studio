@@ -78,7 +78,7 @@ export function SwipeSession({ listId, onDone }: Props) {
           Close
         </button>
         <span className="rounded-full bg-muted px-3 py-1 text-xs">
-          {index + 1} / {total}
+          {total - index} / {total}
         </span>
       </div>
       <div className="w-full max-w-md">
