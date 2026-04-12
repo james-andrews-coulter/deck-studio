@@ -1,7 +1,12 @@
+import { RouterProvider } from 'react-router-dom';
+import { router } from './router';
+import { Toaster } from 'sonner';
+
 export default function App() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-2xl font-semibold">Deck Studio</h1>
-    </main>
+    <>
+      <RouterProvider router={router} />
+      <Toaster position="top-center" />
+    </>
   );
 }
