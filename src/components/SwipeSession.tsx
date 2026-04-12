@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { SwipeCard } from './SwipeCard';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store';
+import { shuffle } from '@/lib/shuffle';
 
 type Props = { listId: string; onDone: () => void };
 
@@ -13,9 +14,11 @@ export function SwipeSession({ listId, onDone }: Props) {
   const initialQueue = useMemo(
     () =>
       list && deck
-        ? list.cardRefs
-            .filter((r) => !r.hidden && deck.cards.some((c) => c.id === r.cardId))
-            .map((r) => r.cardId)
+        ? shuffle(
+            list.cardRefs
+              .filter((r) => !r.hidden && deck.cards.some((c) => c.id === r.cardId))
+              .map((r) => r.cardId),
+          )
         : [],
     // Freeze queue at session start — intentionally do not depend on list.cardRefs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -27,7 +30,6 @@ export function SwipeSession({ listId, onDone }: Props) {
   >([]);
   const [kept, setKept] = useState(0);
   const [discarded, setDiscarded] = useState(0);
-  const [replacements, setReplacements] = useState<Map<number, string>>(new Map());
 
   if (!list || !deck) return null;
 
@@ -46,10 +48,9 @@ export function SwipeSession({ listId, onDone }: Props) {
     );
   }
 
-  const cardId = replacements.get(index) ?? initialQueue[index];
+  const cardId = initialQueue[index];
   // initialQueue was filtered to only contain IDs that resolve in the deck, so
-  // `card` is guaranteed to be present for any queue position; replacements are
-  // also pulled from list.cardRefs so they resolve too. Fall back defensively.
+  // `card` is guaranteed to be present for any queue position. Fall back defensively.
   const card = deck.cards.find((c) => c.id === cardId);
 
   const commit = (dir: 'keep' | 'discard') => {
@@ -71,19 +72,6 @@ export function SwipeSession({ listId, onDone }: Props) {
     if (last.direction === 'keep') setKept((n) => n - 1);
     else setDiscarded((n) => n - 1);
     setIndex((i) => i - 1);
-  };
-
-  const drawRandom = () => {
-    const visible = list.cardRefs
-      .filter((r) => !r.hidden && deck.cards.some((c) => c.id === r.cardId))
-      .map((r) => r.cardId);
-    if (!visible.length) return;
-    const picked = visible[Math.floor(Math.random() * visible.length)];
-    setReplacements((m) => {
-      const next = new Map(m);
-      next.set(index, picked);
-      return next;
-    });
   };
 
   if (!card) return null;
@@ -109,9 +97,6 @@ export function SwipeSession({ listId, onDone }: Props) {
         </Button>
         <Button variant="outline" onClick={undo} disabled={!undoStack.length}>
           Undo
-        </Button>
-        <Button variant="outline" onClick={drawRandom} aria-label="Randomize the current card">
-          🎲 Randomize
         </Button>
         <Button onClick={() => commit('keep')}>Keep</Button>
       </div>
