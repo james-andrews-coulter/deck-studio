@@ -1,0 +1,51 @@
+{
+  "name": "Creative Prompts",
+  "fieldMapping": {
+    "title": "prompt",
+    "subtitle": "category",
+    "body": "elaboration",
+    "meta": ["difficulty", "tags"]
+  },
+  "cards": [
+    {
+      "id": "1",
+      "prompt": "Use an old idea",
+      "category": "Oblique Strategy",
+      "elaboration": "Look back at something you dismissed. What feels true about it now?",
+      "difficulty": "easy",
+      "tags": ["reflective", "warmup"]
+    },
+    {
+      "id": "2",
+      "prompt": "Honor thy error as a hidden intention",
+      "category": "Oblique Strategy",
+      "elaboration": "What might the mistake be revealing?",
+      "difficulty": "medium",
+      "tags": ["reframe"]
+    },
+    {
+      "id": "3",
+      "prompt": "Ask your body",
+      "category": "Somatic",
+      "elaboration": "Where do you feel stuck? Breathe into that.",
+      "difficulty": "easy",
+      "tags": ["pause"]
+    },
+    {
+      "id": "4",
+      "prompt": "Repetition is a form of change",
+      "category": "Oblique Strategy",
+      "elaboration": "Return to the same spot with fresh eyes.",
+      "difficulty": "hard",
+      "tags": ["discipline", "craft"]
+    },
+    {
+      "id": "5",
+      "prompt": "Take a break",
+      "category": "Permission",
+      "elaboration": "Really. Go.",
+      "difficulty": "easy",
+      "tags": ["rest"]
+    }
+  ]
+}
