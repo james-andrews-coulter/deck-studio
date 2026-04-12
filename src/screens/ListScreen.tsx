@@ -302,7 +302,7 @@ export default function ListScreen() {
               }}
               aria-label="New group name"
               className={cn(
-                'rounded-md border bg-background px-2 py-1 text-sm',
+                'rounded-md border bg-background px-2 py-1 text-base',
                 hiddenCount > 0 ? '' : 'ml-auto',
               )}
             />

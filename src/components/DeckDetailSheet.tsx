@@ -77,7 +77,7 @@ export function DeckDetailSheet() {
               <label className="block text-sm font-medium">
                 Create a new list from this deck
                 <input
-                  className="mt-1 w-full rounded-md border bg-background p-2 text-sm"
+                  className="mt-1 w-full rounded-md border bg-background p-2 text-base"
                   value={listName}
                   onChange={(e) => setListName(e.target.value)}
                   onKeyDown={(e) => {

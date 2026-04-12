@@ -140,7 +140,7 @@ export default function ListsScreen() {
             <label className="block text-sm font-medium">
               Deck
               <select
-                className="mt-1 w-full rounded-md border bg-background p-2 text-sm"
+                className="mt-1 w-full rounded-md border bg-background p-2 text-base"
                 value={wizardDeckId}
                 onChange={(e) => setWizardDeckId(e.target.value)}
               >
@@ -155,7 +155,7 @@ export default function ListsScreen() {
             <label className="block text-sm font-medium">
               Name
               <input
-                className="mt-1 w-full rounded-md border bg-background p-2 text-sm"
+                className="mt-1 w-full rounded-md border bg-background p-2 text-base"
                 value={wizardName}
                 onChange={(e) => setWizardName(e.target.value)}
                 placeholder="My shortlist"
@@ -180,7 +180,7 @@ export default function ListsScreen() {
           </DialogHeader>
           <input
             autoFocus
-            className="w-full rounded-md border bg-background p-2 text-sm"
+            className="w-full rounded-md border bg-background p-2 text-base"
             value={renameTarget?.name ?? ''}
             onChange={(e) =>
               setRenameTarget((t) => (t ? { ...t, name: e.target.value } : t))

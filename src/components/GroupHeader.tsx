@@ -66,7 +66,7 @@ export function GroupHeader({ listId, group, count, dragHandleProps }: Props) {
           onBlur={onRename}
           onKeyDown={(e) => { if (e.key === 'Enter') onRename(); if (e.key === 'Escape') { setName(group.name); setEditing(false); }}}
           onPointerDown={(e) => e.stopPropagation()}
-          className="flex-1 rounded-md border bg-background p-1 text-sm"
+          className="flex-1 rounded-md border bg-background p-1 text-base"
         />
       ) : (
         <button

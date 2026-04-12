@@ -33,7 +33,7 @@ export function FieldMappingEditor({ cards, detectedKeys, initial, onSave }: Pro
           <label key={role} className="flex items-center gap-3">
             <span className="w-20 text-sm font-medium">{label}{required ? ' *' : ''}</span>
             <select
-              className="flex-1 rounded-md border bg-background p-2 text-sm"
+              className="flex-1 rounded-md border bg-background p-2 text-base"
               value={(mapping[role] as string) ?? ''}
               onChange={(e) =>
                 setMapping((m) => ({ ...m, [role]: e.target.value || undefined }))
