@@ -17,7 +17,6 @@ import {
 } from '@dnd-kit/sortable';
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
-import { CardDetailSheet } from '@/components/CardDetailSheet';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
 import { DrawCardDialog } from '@/components/DrawCardDialog';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
@@ -32,7 +31,6 @@ export default function ListScreen() {
   const { listId = '' } = useParams();
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
-  const setCardDetail = useAppStore((s) => s.setCardDetail);
   const addGroup = useAppStore((s) => s.addGroup);
   const collapsed = useAppStore((s) => s.ui.collapsedGroups);
   const setCardRefs = useAppStore((s) => s.setCardRefs);
@@ -168,7 +166,7 @@ export default function ListScreen() {
             className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
             onClick={() => setMode('view')}
           >
-            View
+            List
           </button>
           <button
             className={cn('px-2 py-1', mode === 'swipe' && 'bg-muted')}
@@ -200,19 +198,13 @@ export default function ListScreen() {
                       const card = deck.cards.find((c) => c.id === r.cardId);
                       return (
                         <SortableCard key={r.cardId} id={r.cardId}>
-                          <button
-                            type="button"
-                            className="w-full text-left"
-                            onClick={() => setCardDetail({ listId: list.id, cardId: r.cardId })}
-                          >
-                            {card ? (
-                              <CardView card={card} mapping={deck.fieldMapping} />
-                            ) : (
-                              <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                                Missing card
-                              </div>
-                            )}
-                          </button>
+                          {card ? (
+                            <CardView card={card} mapping={deck.fieldMapping} />
+                          ) : (
+                            <div className="rounded border p-2 text-sm italic text-muted-foreground">
+                              Missing card
+                            </div>
+                          )}
                         </SortableCard>
                       );
                     })}
@@ -235,19 +227,13 @@ export default function ListScreen() {
                   const card = deck.cards.find((c) => c.id === r.cardId);
                   return (
                     <SortableCard key={r.cardId} id={r.cardId}>
-                      <button
-                        type="button"
-                        className="w-full text-left"
-                        onClick={() => setCardDetail({ listId: list.id, cardId: r.cardId })}
-                      >
-                        {card ? (
-                          <CardView card={card} mapping={deck.fieldMapping} />
-                        ) : (
-                          <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                            Missing card
-                          </div>
-                        )}
-                      </button>
+                      {card ? (
+                        <CardView card={card} mapping={deck.fieldMapping} />
+                      ) : (
+                        <div className="rounded border p-2 text-sm italic text-muted-foreground">
+                          Missing card
+                        </div>
+                      )}
                     </SortableCard>
                   );
                 })}
@@ -257,7 +243,6 @@ export default function ListScreen() {
         )}
       </DndContext>
 
-      <CardDetailSheet listId={list.id} />
       <HiddenCardsSheet listId={list.id} />
 
       <button

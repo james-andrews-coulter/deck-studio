@@ -73,10 +73,7 @@ export function SwipeSession({ listId, onDone }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div className="flex w-full items-center justify-between">
-        <button onClick={onDone} aria-label="Exit swipe mode" className="text-sm underline">
-          Close
-        </button>
+      <div className="flex w-full items-center justify-end">
         <span className="rounded-full bg-muted px-3 py-1 text-xs">
           {total - index} / {total}
         </span>
