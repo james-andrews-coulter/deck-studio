@@ -19,7 +19,6 @@ import {
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
-import { DrawCardDialog } from '@/components/DrawCardDialog';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
@@ -62,7 +61,6 @@ export default function ListScreen() {
   const moveCardToGroup = useAppStore((s) => s.moveCardToGroup);
   const setHidden = useAppStore((s) => s.setHidden);
   const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
-  const setDrawOpen = useAppStore((s) => s.setDrawCardOpen);
 
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
 
@@ -329,14 +327,6 @@ export default function ListScreen() {
         }}
       />
 
-      <button
-        aria-label="Draw a random card"
-        onClick={() => setDrawOpen(true)}
-        className="fixed bottom-20 right-4 z-20 rounded-full bg-primary px-5 py-3 text-primary-foreground shadow-lg md:bottom-8"
-      >
-        🎲 Draw
-      </button>
-      <DrawCardDialog listId={list.id} />
         </>
       )}
     </div>

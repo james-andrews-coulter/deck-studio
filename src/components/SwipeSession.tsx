@@ -27,6 +27,7 @@ export function SwipeSession({ listId, onDone }: Props) {
   >([]);
   const [kept, setKept] = useState(0);
   const [discarded, setDiscarded] = useState(0);
+  const [replacements, setReplacements] = useState<Map<number, string>>(new Map());
 
   if (!list || !deck) return null;
 
@@ -45,10 +46,11 @@ export function SwipeSession({ listId, onDone }: Props) {
     );
   }
 
-  const cardId = initialQueue[index];
+  const cardId = replacements.get(index) ?? initialQueue[index];
   // initialQueue was filtered to only contain IDs that resolve in the deck, so
-  // `card` is guaranteed to be present for any queue position.
-  const card = deck.cards.find((c) => c.id === cardId)!;
+  // `card` is guaranteed to be present for any queue position; replacements are
+  // also pulled from list.cardRefs so they resolve too. Fall back defensively.
+  const card = deck.cards.find((c) => c.id === cardId);
 
   const commit = (dir: 'keep' | 'discard') => {
     if (dir === 'discard') {
@@ -71,6 +73,21 @@ export function SwipeSession({ listId, onDone }: Props) {
     setIndex((i) => i - 1);
   };
 
+  const drawRandom = () => {
+    const visible = list.cardRefs
+      .filter((r) => !r.hidden && deck.cards.some((c) => c.id === r.cardId))
+      .map((r) => r.cardId);
+    if (!visible.length) return;
+    const picked = visible[Math.floor(Math.random() * visible.length)];
+    setReplacements((m) => {
+      const next = new Map(m);
+      next.set(index, picked);
+      return next;
+    });
+  };
+
+  if (!card) return null;
+
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="flex w-full items-center justify-end">
@@ -80,18 +97,21 @@ export function SwipeSession({ listId, onDone }: Props) {
       </div>
       <div className="w-full max-w-md">
         <SwipeCard
-          key={cardId}
+          key={`${cardId}-${index}`}
           card={card}
           mapping={deck.fieldMapping}
           onCommit={commit}
         />
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap justify-center gap-2">
         <Button variant="outline" onClick={() => commit('discard')}>
           Discard
         </Button>
         <Button variant="outline" onClick={undo} disabled={!undoStack.length}>
           Undo
+        </Button>
+        <Button variant="outline" onClick={drawRandom} aria-label="Draw a random card">
+          🎲 Draw
         </Button>
         <Button onClick={() => commit('keep')}>Keep</Button>
       </div>
