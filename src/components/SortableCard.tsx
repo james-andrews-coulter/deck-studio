@@ -3,9 +3,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 
-type Props = { id: string; children: ReactNode };
+type Props = { id: string; children: ReactNode; leading?: ReactNode };
 
-export function SortableCard({ id, children }: Props) {
+export function SortableCard({ id, children, leading }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -14,6 +14,7 @@ export function SortableCard({ id, children }: Props) {
   };
   return (
     <li ref={setNodeRef} style={style} {...attributes} className="flex items-stretch gap-1">
+      {leading}
       <button
         type="button"
         aria-label="Drag to reorder"

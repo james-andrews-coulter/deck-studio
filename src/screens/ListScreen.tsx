@@ -63,6 +63,15 @@ export default function ListScreen() {
   const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
 
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleSelect = (cardId: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      if (n.has(cardId)) n.delete(cardId);
+      else n.add(cardId);
+      return n;
+    });
+  const clearSelection = () => setSelected(new Set());
 
   const [params, setParams] = useSearchParams();
   const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
@@ -155,6 +164,21 @@ export default function ListScreen() {
 
   const ungroupedRows = refsByGroup(null);
 
+  const renderCheckbox = (cardId: string) => (
+    <span
+      onPointerDown={(e) => e.stopPropagation()}
+      className="flex w-7 shrink-0 items-center justify-center"
+    >
+      <input
+        type="checkbox"
+        aria-label={`Select card ${cardId}`}
+        checked={selected.has(cardId)}
+        onChange={() => toggleSelect(cardId)}
+        className="h-4 w-4 cursor-pointer"
+      />
+    </span>
+  );
+
   return (
     <div className="p-3 md:p-5">
       <header className="flex items-center gap-2">
@@ -239,7 +263,11 @@ export default function ListScreen() {
                         {rows.map((r) => {
                           const card = deck.cards.find((c) => c.id === r.cardId);
                           return (
-                            <SortableCard key={r.cardId} id={r.cardId}>
+                            <SortableCard
+                              key={r.cardId}
+                              id={r.cardId}
+                              leading={renderCheckbox(r.cardId)}
+                            >
                               <SwipeableRow
                                 onHide={() => setHidden(list.id, r.cardId, true)}
                                 onRequestMove={() =>
@@ -287,7 +315,11 @@ export default function ListScreen() {
                     {ungroupedRows.map((r) => {
                       const card = deck.cards.find((c) => c.id === r.cardId);
                       return (
-                        <SortableCard key={r.cardId} id={r.cardId}>
+                        <SortableCard
+                          key={r.cardId}
+                          id={r.cardId}
+                          leading={renderCheckbox(r.cardId)}
+                        >
                           <SwipeableRow
                             onHide={() => setHidden(list.id, r.cardId, true)}
                             onRequestMove={() =>
@@ -324,9 +356,28 @@ export default function ListScreen() {
             moveCardToGroup(list.id, cid, groupId);
           }
           setMoveTarget(null);
+          clearSelection();
         }}
       />
 
+      {selected.size > 0 && (
+        <div className="fixed inset-x-0 bottom-14 z-20 mx-auto flex max-w-md items-center justify-between gap-2 rounded-full border bg-background p-2 shadow-lg md:bottom-4">
+          <span className="pl-3 text-sm">{selected.size} selected</span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={clearSelection}>
+              Clear
+            </Button>
+            <Button
+              size="sm"
+              onClick={() =>
+                setMoveTarget({ cardIds: Array.from(selected) })
+              }
+            >
+              Move to…
+            </Button>
+          </div>
+        </div>
+      )}
         </>
       )}
     </div>
