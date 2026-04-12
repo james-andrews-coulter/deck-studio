@@ -1,0 +1,11 @@
+{
+  "name": "Oblique Strategies (sample)",
+  "fieldMapping": { "title": "prompt" },
+  "cards": [
+    { "id": "1", "prompt": "Use an old idea." },
+    { "id": "2", "prompt": "Honor thy error as a hidden intention." },
+    { "id": "3", "prompt": "Ask your body." },
+    { "id": "4", "prompt": "Take a break." },
+    { "id": "5", "prompt": "Repetition is a form of change." }
+  ]
+}

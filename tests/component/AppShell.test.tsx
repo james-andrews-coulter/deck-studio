@@ -27,7 +27,7 @@ describe('AppShell', () => {
 
   it('renders the Decks screen at /decks', () => {
     renderAt('/decks');
-    expect(screen.getByRole('heading', { name: /decks/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^decks$/i })).toBeInTheDocument();
   });
 
   it('renders the Lists screen at /lists', () => {
