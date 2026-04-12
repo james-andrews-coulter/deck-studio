@@ -28,11 +28,11 @@ import { ListMenu } from '@/components/ListMenu';
 import { SwipeSession } from '@/components/SwipeSession';
 import { SwipeableRow } from '@/components/SwipeableRow';
 import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
+import { GroupNameInput } from '@/components/GroupNameInput';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -100,10 +100,7 @@ export default function ListScreen() {
   const setHiddenSheetOpen = useAppStore((s) => s.setHiddenSheetOpen);
 
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
-  const [pendingAutoGroup, setPendingAutoGroup] = useState<{
-    cardIds: [string, string];
-    name: string;
-  } | null>(null);
+  const [newGroupFromSelectionOpen, setNewGroupFromSelectionOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
   const toggleSelect = (cardId: string) =>
@@ -176,17 +173,6 @@ export default function ListScreen() {
   const refsByGroup = (gid: string | null) =>
     list.cardRefs.filter((r) => r.groupId === gid && !r.hidden);
 
-  const commitAutoGroup = () => {
-    if (!pendingAutoGroup) return;
-    const { cardIds, name } = pendingAutoGroup;
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    const newId = addGroup(list!.id, trimmed);
-    moveCardToGroup(list!.id, cardIds[0], newId);
-    moveCardToGroup(list!.id, cardIds[1], newId);
-    setPendingAutoGroup(null);
-  };
-
   const onDragEnd = (evt: DragEndEvent) => {
     const { active, over } = evt;
     if (!over || active.id === over.id) return;
@@ -218,18 +204,6 @@ export default function ListScreen() {
     }
 
     const overRef = list.cardRefs.find((r) => r.cardId === over.id);
-
-    // Auto-group: when two ungrouped cards are dropped onto each other, prompt
-    // the user to create a new group containing both. Must run before the
-    // standard same-group / cross-group branches and return early so they
-    // don't also fire.
-    if (activeRef.groupId === null && overRef && overRef.groupId === null) {
-      setPendingAutoGroup({
-        cardIds: [String(active.id), String(over.id)],
-        name: 'New group',
-      });
-      return;
-    }
 
     const sameGroup = overRef && overRef.groupId === activeRef.groupId;
     if (sameGroup) {
@@ -446,41 +420,28 @@ export default function ListScreen() {
           clearSelection();
         }}
       />
-      <Dialog
-        open={!!pendingAutoGroup}
-        onOpenChange={(o) => !o && setPendingAutoGroup(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Group these cards?</DialogTitle>
-          </DialogHeader>
-          <input
-            autoFocus
-            className="w-full rounded-md border bg-background p-2 text-sm"
-            value={pendingAutoGroup?.name ?? ''}
-            onChange={(e) =>
-              setPendingAutoGroup((p) => (p ? { ...p, name: e.target.value } : p))
-            }
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') commitAutoGroup();
-              if (e.key === 'Escape') setPendingAutoGroup(null);
-            }}
-            placeholder="Group name"
-            aria-label="Group name"
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPendingAutoGroup(null)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={commitAutoGroup}
-              disabled={!pendingAutoGroup?.name.trim()}
-            >
-              Create group
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {newGroupFromSelectionOpen && (
+        <Dialog
+          open
+          onOpenChange={(o) => !o && setNewGroupFromSelectionOpen(false)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New group from {selected.size} cards</DialogTitle>
+            </DialogHeader>
+            <GroupNameInput
+              onConfirm={(name) => {
+                const id = addGroup(list.id, name);
+                selected.forEach((cardId) => moveCardToGroup(list.id, cardId, id));
+                setNewGroupFromSelectionOpen(false);
+                clearSelection();
+                setSelectMode(false);
+              }}
+              onCancel={() => setNewGroupFromSelectionOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {selectMode && selected.size > 0 && (
         <div className="fixed inset-x-0 bottom-14 z-20 mx-auto flex max-w-md items-center justify-between gap-2 rounded-full border bg-background p-2 shadow-lg md:bottom-4">
@@ -489,6 +450,15 @@ export default function ListScreen() {
             <Button size="sm" variant="outline" onClick={clearSelection}>
               Clear
             </Button>
+            {selected.size >= 2 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setNewGroupFromSelectionOpen(true)}
+              >
+                New group
+              </Button>
+            )}
             <Button
               size="sm"
               onClick={() =>
