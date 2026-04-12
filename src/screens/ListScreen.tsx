@@ -64,6 +64,7 @@ export default function ListScreen() {
 
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
   const toggleSelect = (cardId: string) =>
     setSelected((s) => {
       const n = new Set(s);
@@ -72,6 +73,12 @@ export default function ListScreen() {
       return n;
     });
   const clearSelection = () => setSelected(new Set());
+  const toggleSelectMode = () => {
+    setSelectMode((on) => {
+      if (on) setSelected(new Set());
+      return !on;
+    });
+  };
 
   const [params, setParams] = useSearchParams();
   const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
@@ -164,20 +171,44 @@ export default function ListScreen() {
 
   const ungroupedRows = refsByGroup(null);
 
-  const renderCheckbox = (cardId: string) => (
-    <span
-      onPointerDown={(e) => e.stopPropagation()}
-      className="flex w-7 shrink-0 items-center justify-center"
-    >
-      <input
-        type="checkbox"
-        aria-label={`Select card ${cardId}`}
-        checked={selected.has(cardId)}
-        onChange={() => toggleSelect(cardId)}
-        className="h-4 w-4 cursor-pointer"
-      />
-    </span>
-  );
+  const renderRow = (cardId: string) => {
+    const card = deck.cards.find((c) => c.id === cardId);
+    const body = (
+      <SwipeableRow
+        onHide={() => setHidden(list.id, cardId, true)}
+        onRequestMove={() => setMoveTarget({ cardIds: [cardId] })}
+      >
+        {card ? (
+          <CardView card={card} mapping={deck.fieldMapping} />
+        ) : (
+          <div className="rounded border p-2 text-sm italic text-muted-foreground">
+            Missing card
+          </div>
+        )}
+      </SwipeableRow>
+    );
+    if (selectMode) {
+      return (
+        <li key={cardId} className="flex items-stretch gap-1">
+          <span className="flex w-7 shrink-0 items-center justify-center">
+            <input
+              type="checkbox"
+              aria-label={`Select card ${cardId}`}
+              checked={selected.has(cardId)}
+              onChange={() => toggleSelect(cardId)}
+              className="h-4 w-4 cursor-pointer"
+            />
+          </span>
+          <div className="flex-1 min-w-0">{body}</div>
+        </li>
+      );
+    }
+    return (
+      <SortableCard key={cardId} id={cardId}>
+        {body}
+      </SortableCard>
+    );
+  };
 
   return (
     <div className="p-3 md:p-5">
@@ -222,6 +253,15 @@ export default function ListScreen() {
               )}
             />
           ))}
+        {mode === 'view' && (
+          <Button
+            size="sm"
+            variant={selectMode ? 'default' : 'outline'}
+            onClick={toggleSelectMode}
+          >
+            {selectMode ? 'Done' : 'Select'}
+          </Button>
+        )}
         <div className={cn('inline-flex rounded-md border p-0.5 text-xs', mode === 'swipe' && 'ml-auto')}>
           <button
             className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
@@ -261,31 +301,7 @@ export default function ListScreen() {
                       </div>
                     ) : (
                       <ul className="mt-2 space-y-1.5">
-                        {rows.map((r) => {
-                          const card = deck.cards.find((c) => c.id === r.cardId);
-                          return (
-                            <SortableCard
-                              key={r.cardId}
-                              id={r.cardId}
-                              leading={renderCheckbox(r.cardId)}
-                            >
-                              <SwipeableRow
-                                onHide={() => setHidden(list.id, r.cardId, true)}
-                                onRequestMove={() =>
-                                  setMoveTarget({ cardIds: [r.cardId] })
-                                }
-                              >
-                                {card ? (
-                                  <CardView card={card} mapping={deck.fieldMapping} />
-                                ) : (
-                                  <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                                    Missing card
-                                  </div>
-                                )}
-                              </SwipeableRow>
-                            </SortableCard>
-                          );
-                        })}
+                        {rows.map((r) => renderRow(r.cardId))}
                       </ul>
                     )}
                   </SortableContext>
@@ -313,31 +329,7 @@ export default function ListScreen() {
                   </div>
                 ) : (
                   <ul className="space-y-1.5">
-                    {ungroupedRows.map((r) => {
-                      const card = deck.cards.find((c) => c.id === r.cardId);
-                      return (
-                        <SortableCard
-                          key={r.cardId}
-                          id={r.cardId}
-                          leading={renderCheckbox(r.cardId)}
-                        >
-                          <SwipeableRow
-                            onHide={() => setHidden(list.id, r.cardId, true)}
-                            onRequestMove={() =>
-                              setMoveTarget({ cardIds: [r.cardId] })
-                            }
-                          >
-                            {card ? (
-                              <CardView card={card} mapping={deck.fieldMapping} />
-                            ) : (
-                              <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                                Missing card
-                              </div>
-                            )}
-                          </SwipeableRow>
-                        </SortableCard>
-                      );
-                    })}
+                    {ungroupedRows.map((r) => renderRow(r.cardId))}
                   </ul>
                 )}
               </SortableContext>
@@ -361,7 +353,7 @@ export default function ListScreen() {
         }}
       />
 
-      {selected.size > 0 && (
+      {selectMode && selected.size > 0 && (
         <div className="fixed inset-x-0 bottom-14 z-20 mx-auto flex max-w-md items-center justify-between gap-2 rounded-full border bg-background p-2 shadow-lg md:bottom-4">
           <span className="pl-3 text-sm">{selected.size} selected</span>
           <div className="flex gap-2">
