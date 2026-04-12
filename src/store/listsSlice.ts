@@ -13,7 +13,6 @@ export type ListsSlice = {
   reorderCards: (listId: string, fromIndex: number, toIndex: number) => void;
   setHidden: (listId: string, cardId: string, hidden: boolean) => void;
   restoreAllHidden: (listId: string) => void;
-  removeCard: (listId: string, cardId: string) => void;
 
   addGroup: (listId: string, name: string) => string;
   renameGroup: (listId: string, groupId: string, name: string) => void;
@@ -118,12 +117,6 @@ export const createListsSlice: StateCreator<
     set(withList(listId, (l) => ({
       ...l,
       cardRefs: l.cardRefs.map((r) => ({ ...r, hidden: false })),
-    }))),
-
-  removeCard: (listId, cardId) =>
-    set(withList(listId, (l) => ({
-      ...l,
-      cardRefs: l.cardRefs.filter((r) => r.cardId !== cardId),
     }))),
 
   addGroup: (listId, name) => {

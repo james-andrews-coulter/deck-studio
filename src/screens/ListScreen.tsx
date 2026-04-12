@@ -28,6 +28,7 @@ import { ListMenu } from '@/components/ListMenu';
 import { SwipeSession } from '@/components/SwipeSession';
 import { SwipeableRow } from '@/components/SwipeableRow';
 import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
+import { SelectionActionBar } from '@/components/SelectionActionBar';
 import { GroupNameInput } from '@/components/GroupNameInput';
 import { Button } from '@/components/ui/button';
 import {
@@ -443,32 +444,13 @@ export default function ListScreen() {
         </Dialog>
       )}
 
-      {selectMode && selected.size > 0 && (
-        <div className="fixed inset-x-0 bottom-14 z-20 mx-auto flex max-w-md items-center justify-between gap-2 rounded-full border bg-background p-2 shadow-lg md:bottom-4">
-          <span className="pl-3 text-sm">{selected.size} selected</span>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={clearSelection}>
-              Clear
-            </Button>
-            {selected.size >= 2 && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setNewGroupFromSelectionOpen(true)}
-              >
-                New group
-              </Button>
-            )}
-            <Button
-              size="sm"
-              onClick={() =>
-                setMoveTarget({ cardIds: Array.from(selected) })
-              }
-            >
-              Move to…
-            </Button>
-          </div>
-        </div>
+      {selectMode && (
+        <SelectionActionBar
+          count={selected.size}
+          onClear={clearSelection}
+          onNewGroup={() => setNewGroupFromSelectionOpen(true)}
+          onMoveTo={() => setMoveTarget({ cardIds: Array.from(selected) })}
+        />
       )}
         </>
       )}
