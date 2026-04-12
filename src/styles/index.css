@@ -21,4 +21,8 @@
     padding-bottom: env(safe-area-inset-bottom);
     padding-top: env(safe-area-inset-top);
   }
+  /* Prevent iOS Safari zoom-on-focus: inputs must be >= 16px computed font-size */
+  input, textarea, select {
+    font-size: 16px;
+  }
 }
