@@ -19,8 +19,10 @@ export function BottomTabs() {
           to={to}
           className={({ isActive }) =>
             cn(
-              'flex flex-col items-center justify-center gap-1 py-3 text-xs font-medium md:flex-row md:px-3 md:py-1 md:text-sm',
-              isActive ? 'text-foreground' : 'text-muted-foreground'
+              'relative flex flex-col items-center justify-center gap-1 py-3 text-xs font-medium md:flex-row md:px-3 md:py-1 md:text-sm',
+              isActive
+                ? 'text-foreground font-semibold after:absolute after:inset-x-6 after:bottom-0 after:h-0.5 after:rounded-full after:bg-foreground md:after:inset-x-0 md:after:top-full md:after:mt-1'
+                : 'text-muted-foreground'
             )
           }
         >
