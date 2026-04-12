@@ -34,7 +34,11 @@ describe('ListScreen', () => {
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.queryByText('Beta')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Alpha/i }));
+    // After Task 13, list items are wrapped with dnd-kit's useSortable which
+    // spreads role="button" on the <li>. Click the inner <button> (type="button") explicitly.
+    const alphaButton = screen.getAllByRole('button', { name: /Alpha/i }).find((el) => el.tagName === 'BUTTON');
+    if (!alphaButton) throw new Error('Alpha button not found');
+    await user.click(alphaButton);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });
