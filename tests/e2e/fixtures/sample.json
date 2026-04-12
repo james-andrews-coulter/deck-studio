@@ -1,0 +1,9 @@
+{
+  "name": "E2E Deck",
+  "fieldMapping": { "title": "prompt" },
+  "cards": [
+    { "id": "1", "prompt": "Alpha" },
+    { "id": "2", "prompt": "Beta" },
+    { "id": "3", "prompt": "Gamma" }
+  ]
+}
