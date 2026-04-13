@@ -37,6 +37,8 @@ export default function ListsScreen() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardDeckId, setWizardDeckId] = useState<string>('');
   const [wizardName, setWizardName] = useState('');
+  const [wizardExerciseId, setWizardExerciseId] = useState<string>('');
+  const [nameAutoFillSource, setNameAutoFillSource] = useState<string | null>(null);
 
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
@@ -57,11 +59,43 @@ export default function ListsScreen() {
     return map;
   }, [decks]);
 
+  const wizardDeck = wizardDeckId ? decksById[wizardDeckId] : undefined;
+  const wizardExercises = wizardDeck?.exercises ?? [];
+  const wizardExercise = wizardExerciseId
+    ? wizardExercises.find((e) => e.id === wizardExerciseId)
+    : undefined;
+
+  const onDeckChange = (id: string) => {
+    setWizardDeckId(id);
+    setWizardExerciseId('');
+    if (nameAutoFillSource && wizardName === nameAutoFillSource) {
+      setWizardName('');
+      setNameAutoFillSource(null);
+    }
+  };
+
+  const onExerciseChange = (nextId: string) => {
+    setWizardExerciseId(nextId);
+    const ex = wizardExercises.find((x) => x.id === nextId);
+    const nameIsEmptyOrAutoFilled =
+      !wizardName.trim() || wizardName === nameAutoFillSource;
+    if (ex && nameIsEmptyOrAutoFilled) {
+      setWizardName(ex.name);
+      setNameAutoFillSource(ex.name);
+    }
+  };
+
   const onCreate = () => {
     if (!wizardDeckId || !wizardName.trim()) return;
-    const id = createList(wizardDeckId, wizardName.trim());
+    const id = createList(
+      wizardDeckId,
+      wizardName.trim(),
+      wizardExerciseId || undefined,
+    );
     setWizardOpen(false);
     setWizardName('');
+    setWizardExerciseId('');
+    setNameAutoFillSource(null);
     navigate(`/lists/${id}`);
   };
 
@@ -148,7 +182,7 @@ export default function ListsScreen() {
               <select
                 className="mt-1 w-full rounded-md border bg-background p-2 text-base"
                 value={wizardDeckId}
-                onChange={(e) => setWizardDeckId(e.target.value)}
+                onChange={(e) => onDeckChange(e.target.value)}
               >
                 <option value="">Select a deck…</option>
                 {decks.map((d) => (
@@ -158,12 +192,42 @@ export default function ListsScreen() {
                 ))}
               </select>
             </label>
+            {wizardExercises.length > 0 && (
+              <label className="block text-sm font-medium">
+                Exercise (optional)
+                <select
+                  className="mt-1 w-full rounded-md border bg-background p-2 text-base"
+                  value={wizardExerciseId}
+                  onChange={(e) => onExerciseChange(e.target.value)}
+                >
+                  <option value="">None — start empty</option>
+                  {wizardExercises.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.name}
+                    </option>
+                  ))}
+                </select>
+                {wizardExercise && (
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    Seeds {wizardExercise.groups.length} group
+                    {wizardExercise.groups.length === 1 ? '' : 's'}:{' '}
+                    {wizardExercise.groups.join(' · ')}
+                  </p>
+                )}
+              </label>
+            )}
             <label className="block text-sm font-medium">
               Name
               <input
                 className="mt-1 w-full rounded-md border bg-background p-2 text-base"
                 value={wizardName}
-                onChange={(e) => setWizardName(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setWizardName(v);
+                  if (nameAutoFillSource && v !== nameAutoFillSource) {
+                    setNameAutoFillSource(null);
+                  }
+                }}
                 placeholder="My shortlist"
               />
             </label>
