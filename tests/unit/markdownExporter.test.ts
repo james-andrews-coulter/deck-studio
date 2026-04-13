@@ -81,4 +81,40 @@ describe('exportListToMarkdown', () => {
     const md = exportListToMarkdown(list, deck, '2026-04-12');
     expect(md).toContain('*No cards yet*');
   });
+
+  it('escapes emphasis-breaking characters in title and body', () => {
+    const escDeck: Deck = {
+      ...deck,
+      cards: [{ id: 'c1', fields: { t: 'Uses **stars** and _under_', b: 'has `code` and [link](x)' } }],
+    };
+    const escList: List = {
+      ...baseList,
+      cardRefs: [{ cardId: 'c1', hidden: false, groupId: null }],
+      groups: [],
+    };
+    const md = exportListToMarkdown(escList, escDeck, '2026-04-12');
+    // Title is inside **...** — unescaped asterisks would close emphasis early
+    expect(md).toContain('- **Uses \\*\\*stars\\*\\* and \\_under\\_**');
+    // Body characters are escaped too
+    expect(md).toContain('has \\`code\\` and \\[link\\](x)');
+  });
+
+  it('escapes emphasis characters in the deck name', () => {
+    const md = exportListToMarkdown(baseList, { ...deck, name: '*emphatic* deck' }, '2026-04-12');
+    expect(md).toContain('> From deck: *\\*emphatic\\* deck*');
+  });
+
+  it('indents every continuation line of a multi-line body under its bullet', () => {
+    const mlDeck: Deck = {
+      ...deck,
+      cards: [{ id: 'c1', fields: { t: 'Title', b: 'line one\nline two\nline three' } }],
+    };
+    const mlList: List = {
+      ...baseList,
+      cardRefs: [{ cardId: 'c1', hidden: false, groupId: null }],
+      groups: [],
+    };
+    const md = exportListToMarkdown(mlList, mlDeck, '2026-04-12');
+    expect(md).toContain('- **Title**\n  line one\n  line two\n  line three');
+  });
 });
