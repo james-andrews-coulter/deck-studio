@@ -128,4 +128,63 @@ describe('DeckDetailSheet', () => {
     await user.click(screen.getByRole('button', { name: /^re-configure mapping$/i }));
     expect(screen.getByText('Configure')).toBeInTheDocument();
   });
+
+  it('does not render exercise chip or picker when the deck has no exercises', () => {
+    const id = seedDeck();
+    useAppStore.getState().setDeckDetail(id);
+    renderWithRouter();
+    expect(screen.queryByText(/exercise/i)).not.toBeInTheDocument();
+  });
+});
+
+describe('DeckDetailSheet — with exercises', () => {
+  beforeEach(() => {
+    reset();
+  });
+
+  const seedDeckWithExercises = () =>
+    useAppStore.getState().addDeck({
+      name: 'Prompts',
+      fieldMapping: { title: 't' },
+      cards: [{ id: 'c1', fields: { t: 'Alpha' } }],
+      exercises: [
+        { id: 'triage', name: 'Triage', instructions: '', groups: ['Keep', 'Park'] },
+        { id: 'priority', name: 'Priority', instructions: '', groups: ['A', 'B', 'C'] },
+      ],
+    });
+
+  it('shows the exercise count chip', () => {
+    const id = seedDeckWithExercises();
+    useAppStore.getState().setDeckDetail(id);
+    renderWithRouter();
+    expect(screen.getByText(/2 exercises/i)).toBeInTheDocument();
+  });
+
+  it('auto-fills the list name when an exercise is picked', async () => {
+    const user = userEvent.setup();
+    const id = seedDeckWithExercises();
+    useAppStore.getState().setDeckDetail(id);
+    renderWithRouter();
+    const picker = screen.getByRole('combobox', { name: /exercise/i });
+    await user.selectOptions(picker, ['priority']);
+    const nameInput = screen.getByPlaceholderText(/list name/i) as HTMLInputElement;
+    expect(nameInput).toHaveValue('Priority');
+    expect(screen.getByText(/Seeds 3 groups: A · B · C/)).toBeInTheDocument();
+  });
+
+  it('creates a list with the picked exercise id', async () => {
+    const user = userEvent.setup();
+    const id = seedDeckWithExercises();
+    useAppStore.getState().setDeckDetail(id);
+    renderWithRouter();
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /exercise/i }),
+      ['triage'],
+    );
+    await user.click(screen.getByRole('button', { name: /create list/i }));
+    const lists = Object.values(useAppStore.getState().lists);
+    expect(lists).toHaveLength(1);
+    expect(lists[0].exerciseId).toBe('triage');
+    expect(lists[0].groups.map((g) => g.name)).toEqual(['Keep', 'Park']);
+  });
 });
