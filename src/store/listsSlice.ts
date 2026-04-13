@@ -5,7 +5,7 @@ import { shuffle } from '@/lib/shuffle';
 
 export type ListsSlice = {
   lists: Record<string, List>;
-  createList: (deckId: string, name: string) => string;
+  createList: (deckId: string, name: string, exerciseId?: string) => string;
   renameList: (listId: string, name: string) => void;
   duplicateList: (listId: string) => string;
   deleteList: (listId: string) => void;
@@ -51,19 +51,28 @@ export const createListsSlice: StateCreator<
 > = (set, get) => ({
   lists: {},
 
-  createList: (deckId, name) => {
+  createList: (deckId, name, exerciseId) => {
     const deck = get().decks[deckId];
     if (!deck) throw new Error(`Deck ${deckId} not found`);
     const id = uuid();
     const now = new Date().toISOString();
+    let seededGroups: Group[] = [];
+    let boundExerciseId: string | undefined;
+    if (exerciseId) {
+      const ex = deck.exercises?.find((e) => e.id === exerciseId);
+      if (!ex) throw new Error(`Exercise ${exerciseId} not found on deck ${deckId}`);
+      seededGroups = ex.groups.map((label) => ({ id: uuid(), name: label, color: 'slate' }));
+      boundExerciseId = ex.id;
+    }
     const list: List = {
       id,
       name,
       deckId,
       createdAt: now,
       updatedAt: now,
-      groups: [],
+      groups: seededGroups,
       cardRefs: deck.cards.map((c) => ({ cardId: c.id, hidden: false, groupId: null })),
+      ...(boundExerciseId ? { exerciseId: boundExerciseId } : {}),
     };
     set((s) => ({ lists: { ...s.lists, [id]: list } }));
     return id;
