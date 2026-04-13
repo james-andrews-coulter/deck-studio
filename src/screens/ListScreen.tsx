@@ -29,6 +29,7 @@ import { SelectionActionBar } from '@/components/SelectionActionBar';
 import { GroupNameInput } from '@/components/GroupNameInput';
 import { GroupDropZone } from '@/components/GroupDropZone';
 import { SortableGroupSection } from '@/components/SortableGroupSection';
+import { useListSelection } from '@/hooks/useListSelection';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -57,22 +58,8 @@ export default function ListScreen() {
 
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
   const [newGroupFromSelectionOpen, setNewGroupFromSelectionOpen] = useState(false);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [selectMode, setSelectMode] = useState(false);
-  const toggleSelect = (cardId: string) =>
-    setSelected((s) => {
-      const n = new Set(s);
-      if (n.has(cardId)) n.delete(cardId);
-      else n.add(cardId);
-      return n;
-    });
-  const clearSelection = () => setSelected(new Set());
-  const toggleSelectMode = () => {
-    setSelectMode((on) => {
-      if (on) setSelected(new Set());
-      return !on;
-    });
-  };
+  const { selectMode, selected, toggleSelect, clearSelection, toggleSelectMode } =
+    useListSelection();
 
   const [params, setParams] = useSearchParams();
   const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
@@ -390,8 +377,8 @@ export default function ListScreen() {
                 const id = addGroup(list.id, name);
                 selected.forEach((cardId) => moveCardToGroup(list.id, cardId, id));
                 setNewGroupFromSelectionOpen(false);
-                clearSelection();
-                setSelectMode(false);
+                // toggleSelectMode both flips the flag off and clears the selection
+                toggleSelectMode();
               }}
               onCancel={() => setNewGroupFromSelectionOpen(false)}
             />
