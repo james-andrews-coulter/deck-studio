@@ -128,6 +128,30 @@ describe('ListsScreen — new list dialog with exercise picker', () => {
     expect(screen.getByPlaceholderText(/shortlist/i)).toHaveValue('My plan');
   });
 
+  it('renders the exercise name on list rows with a bound exercise', () => {
+    const deckId = seedDeckWithExercises();
+    useAppStore.getState().createList(deckId, 'Bound', 'priority');
+    useAppStore.getState().createList(deckId, 'Plain');
+    renderScreen();
+    const boundRow = screen.getByText('Bound').closest('a')!;
+    expect(boundRow).toHaveTextContent('Priority Planner');
+    const plainRow = screen.getByText('Plain').closest('a')!;
+    expect(plainRow).not.toHaveTextContent('Priority Planner');
+    expect(plainRow).not.toHaveTextContent('Triage');
+  });
+
+  it('does not render a badge when the exerciseId is unresolved', () => {
+    const deckId = seedDeckWithExercises();
+    useAppStore.getState().createList(deckId, 'Orphaned', 'priority');
+    // simulate the exercise being removed on re-import
+    useAppStore.setState((s) => ({
+      decks: { ...s.decks, [deckId]: { ...s.decks[deckId], exercises: [] } },
+    }));
+    renderScreen();
+    const row = screen.getByText('Orphaned').closest('a')!;
+    expect(row).not.toHaveTextContent('Priority Planner');
+  });
+
   it('creating with an exercise sets exerciseId on the resulting list', async () => {
     const user = userEvent.setup();
     const deckId = seedDeckWithExercises();

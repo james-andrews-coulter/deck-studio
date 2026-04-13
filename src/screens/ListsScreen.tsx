@@ -133,6 +133,17 @@ export default function ListsScreen() {
                     {deck?.name ?? 'Unknown deck'} · {c.visible}/{c.total} cards ·{' '}
                     {new Date(l.updatedAt).toLocaleDateString()}
                   </div>
+                  {(() => {
+                    const ex = l.exerciseId
+                      ? deck?.exercises?.find((e) => e.id === l.exerciseId)
+                      : undefined;
+                    if (!ex) return null;
+                    return (
+                      <div className="mt-0.5 text-xs uppercase tracking-wide text-muted-foreground">
+                        {ex.name}
+                      </div>
+                    );
+                  })()}
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
