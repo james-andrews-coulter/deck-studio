@@ -100,7 +100,7 @@ export default function ListScreen() {
       <div className="p-4 md:p-6">
         <div
           role="alert"
-          className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+          className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
         >
           The deck that this list was created from is missing. Re-import the deck or delete this list.
         </div>
