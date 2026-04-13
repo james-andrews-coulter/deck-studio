@@ -12,3 +12,4 @@ test-results
 .vscode
 .idea
 *.tsbuildinfo
+.superpowers/
