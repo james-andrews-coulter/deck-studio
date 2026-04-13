@@ -20,7 +20,7 @@ This plan implements `docs/superpowers/specs/2026-04-13-deck-exercises-design.md
 - `src/lib/markdownLite.ts` — tiny markdown renderer (paragraphs, bold, italic, ul, ol, line breaks), XSS-safe
 - `src/components/ExerciseSheet.tsx` — expanded panel with instructions + template
 - `src/components/ExercisePeekStrip.tsx` — tap-to-open strip (mobile bottom / desktop right)
-- `tests/unit/markdownLite.test.ts`
+- `tests/unit/markdownLite.test.tsx`
 - `tests/unit/importer-exercises.test.ts`
 - `tests/unit/listsSlice-createList.test.ts`
 - `tests/component/ExerciseSheet.test.tsx`
@@ -148,9 +148,10 @@ Return value is a React element tree (`React.ReactNode`).
 
 - [ ] **Step 1:** Write failing tests.
 
-Create `tests/unit/markdownLite.test.ts`:
+Create `tests/unit/markdownLite.test.tsx`:
 
-```ts
+```tsx
+import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { renderMarkdownLite } from '@/lib/markdownLite';
@@ -223,7 +224,7 @@ describe('renderMarkdownLite', () => {
 
 - [ ] **Step 2:** Run tests to confirm they fail.
 
-Run: `npm test -- tests/unit/markdownLite.test.ts`
+Run: `npm test -- tests/unit/markdownLite.test.tsx`
 Expected: FAIL — `renderMarkdownLite` is not exported.
 
 - [ ] **Step 3:** Implement.
@@ -347,13 +348,13 @@ export function renderMarkdownLite(src: string): React.ReactNode {
 
 - [ ] **Step 4:** Run tests to confirm they pass.
 
-Run: `npm test -- tests/unit/markdownLite.test.ts`
+Run: `npm test -- tests/unit/markdownLite.test.tsx`
 Expected: PASS (10 tests).
 
 - [ ] **Step 5:** Commit.
 
 ```bash
-git add src/lib/markdownLite.ts tests/unit/markdownLite.test.ts
+git add src/lib/markdownLite.ts tests/unit/markdownLite.test.tsx
 git commit -m "feat: add markdownLite renderer with XSS-safe subset"
 ```
 
@@ -1193,7 +1194,7 @@ export function ExercisePeekStrip({ listId }: Props) {
 }
 ```
 
-Note on positioning: mobile fixed-to-bottom sits at `bottom-12` to clear the BottomTabs (`h-12` per `src/components/BottomTabs.tsx`); verify this during manual check. Desktop is fixed to the right edge, full-height, narrow.
+Note on positioning: mobile fixed-to-bottom sits at `bottom-12` (≈48px) to clear the BottomTabs (empirical — BottomTabs height derives from its `py-2.5` + icon + label; verify clearance during Task 15 manual check and bump the offset if needed). Desktop is fixed to the right edge, full-height, narrow.
 
 - [ ] **Step 4:** Run tests.
 
