@@ -8,6 +8,13 @@ export type FieldMapping = {
   meta?: string[];
 };
 
+export type Exercise = {
+  id: string;
+  name: string;
+  instructions: string;
+  groups: string[];
+};
+
 export type Card = {
   id: string;
   fields: Record<string, unknown>;
@@ -19,6 +26,7 @@ export type Deck = {
   importedAt: string;
   fieldMapping: FieldMapping;
   cards: Card[];
+  exercises?: Exercise[];
 };
 
 export type Group = {
@@ -41,6 +49,7 @@ export type List = {
   updatedAt: string;
   groups: Group[];
   cardRefs: CardRef[];
+  exerciseId?: string;
 };
 
 export type ResolvedCard = {
