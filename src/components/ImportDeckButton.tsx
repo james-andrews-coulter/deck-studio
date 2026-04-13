@@ -28,9 +28,13 @@ export function ImportDeckButton() {
         name: parsed.name,
         fieldMapping: parsed.fieldMapping,
         cards: parsed.cards,
+        ...(parsed.exercises.length > 0 ? { exercises: parsed.exercises } : {}),
       });
       if (parsed.warnings.includes('duplicate_ids')) {
         toast.warning('Some duplicate card IDs were removed.');
+      }
+      if (parsed.warnings.some((w) => w.startsWith('exercise_'))) {
+        toast.warning('Some exercises were skipped — check the deck JSON.');
       }
       const isFirstImport = !hasShownFirstImport();
       if (isFirstImport) markFirstImportShown();
