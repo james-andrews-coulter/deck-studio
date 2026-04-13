@@ -18,6 +18,8 @@ import {
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
+import { ExercisePeekStrip } from '@/components/ExercisePeekStrip';
+import { ExerciseSheet } from '@/components/ExerciseSheet';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
@@ -112,6 +114,9 @@ export default function ListScreen() {
   }
 
   const hiddenCount = list.cardRefs.filter((r) => r.hidden).length;
+  const hasResolvedExercise = !!(
+    list.exerciseId && deck.exercises?.some((e) => e.id === list.exerciseId)
+  );
 
   const refsByGroup = (gid: string | null) =>
     list.cardRefs.filter((r) => r.groupId === gid && !r.hidden);
@@ -208,7 +213,12 @@ export default function ListScreen() {
   };
 
   return (
-    <div className="p-3 md:p-5">
+    <div
+      className={cn(
+        'p-3 md:p-5',
+        hasResolvedExercise && mode === 'view' && 'pb-24 md:pr-16',
+      )}
+    >
       <header className="flex items-center gap-2">
         <InlineRenameHeading
           value={list.name}
@@ -349,6 +359,8 @@ export default function ListScreen() {
         )}
       </DndContext>
 
+      <ExercisePeekStrip listId={list.id} />
+      <ExerciseSheet listId={list.id} />
       <HiddenCardsSheet listId={list.id} />
       <MoveToGroupDialog
         open={!!moveTarget}
