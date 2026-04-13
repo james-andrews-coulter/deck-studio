@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store';
+import { InlineRenameHeading } from './InlineRenameHeading';
 import { Button } from './ui/button';
 import {
   Sheet,
@@ -26,6 +27,7 @@ export function DeckDetailSheet() {
     deckId ? Object.values(s.lists).filter((l) => l.deckId === deckId).length : 0,
   );
   const createList = useAppStore((s) => s.createList);
+  const renameDeck = useAppStore((s) => s.renameDeck);
   const deleteDeck = useAppStore((s) => s.deleteDeck);
   const navigate = useNavigate();
 
@@ -66,7 +68,18 @@ export function DeckDetailSheet() {
       <Sheet open={open} onOpenChange={(o) => !o && closeSheet()}>
         <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>{deck?.name ?? 'Deck'}</SheetTitle>
+            <SheetTitle asChild>
+              {deck && deckId ? (
+                <span>
+                  <InlineRenameHeading
+                    value={deck.name}
+                    onChange={(next) => renameDeck(deckId, next)}
+                  />
+                </span>
+              ) : (
+                <span>Deck</span>
+              )}
+            </SheetTitle>
             <SheetDescription>
               {deck ? `${deck.cards.length} ${deck.cards.length === 1 ? 'card' : 'cards'}` : ''}
             </SheetDescription>
