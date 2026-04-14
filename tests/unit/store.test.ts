@@ -38,14 +38,6 @@ describe('store', () => {
     expect(list.groups).toEqual([]);
   });
 
-  it('reorders cardRefs within a list', () => {
-    const deckId = useAppStore.getState().addDeck(sampleDeck);
-    const listId = useAppStore.getState().createList(deckId, 'L');
-    useAppStore.getState().reorderCards(listId, 0, 2);
-    const ids = useAppStore.getState().lists[listId].cardRefs.map((r) => r.cardId);
-    expect(ids).toEqual(['c2', 'c3', 'c1']);
-  });
-
   it('toggles hidden flag', () => {
     const deckId = useAppStore.getState().addDeck(sampleDeck);
     const listId = useAppStore.getState().createList(deckId, 'L');

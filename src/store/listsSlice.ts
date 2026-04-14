@@ -15,7 +15,6 @@ export type ListsSlice = {
   duplicateList: (listId: string) => string;
   deleteList: (listId: string) => void;
 
-  reorderCards: (listId: string, fromIndex: number, toIndex: number) => void;
   setHidden: (listId: string, cardId: string, hidden: boolean) => void;
   restoreAllHidden: (listId: string) => void;
   setProcessed: (
@@ -23,7 +22,6 @@ export type ListsSlice = {
     cardId: string,
     processed: 'keep' | 'discard' | undefined,
   ) => void;
-  clearProcessedForScope: (listId: string, groupId: string | null) => void;
 
   addGroup: (listId: string, name: string) => string;
   renameGroup: (listId: string, groupId: string, name: string) => void;
@@ -52,6 +50,24 @@ const withList =
     return { ...s, lists: { ...s.lists, [listId]: touch(updater(list)) } };
   };
 
+type SeedFromExercise = {
+  seededGroups: Group[];
+  boundExerciseId: string | undefined;
+};
+
+function seedFromExercise(
+  deck: import('@/lib/types').Deck,
+  exerciseId: string | undefined,
+): SeedFromExercise {
+  if (!exerciseId) return { seededGroups: [], boundExerciseId: undefined };
+  const ex = deck.exercises?.find((e) => e.id === exerciseId);
+  if (!ex) throw new Error(`Exercise ${exerciseId} not found on deck ${deck.id}`);
+  return {
+    seededGroups: ex.groups.map((label) => ({ id: uuid(), name: label })),
+    boundExerciseId: ex.id,
+  };
+}
+
 export const createListsSlice: StateCreator<
   ListsSlice & { decks: Record<string, import('@/lib/types').Deck> },
   [],
@@ -63,16 +79,9 @@ export const createListsSlice: StateCreator<
   createList: (deckId, name, exerciseId) => {
     const deck = get().decks[deckId];
     if (!deck) throw new Error(`Deck ${deckId} not found`);
+    const { seededGroups, boundExerciseId } = seedFromExercise(deck, exerciseId);
     const id = uuid();
     const now = new Date().toISOString();
-    let seededGroups: Group[] = [];
-    let boundExerciseId: string | undefined;
-    if (exerciseId) {
-      const ex = deck.exercises?.find((e) => e.id === exerciseId);
-      if (!ex) throw new Error(`Exercise ${exerciseId} not found on deck ${deckId}`);
-      seededGroups = ex.groups.map((label) => ({ id: uuid(), name: label }));
-      boundExerciseId = ex.id;
-    }
     const list: List = {
       id,
       name,
@@ -90,16 +99,9 @@ export const createListsSlice: StateCreator<
   createListFromCards: (deckId, name, cardIds, exerciseId) => {
     const deck = get().decks[deckId];
     if (!deck) throw new Error(`Deck ${deckId} not found`);
+    const { seededGroups, boundExerciseId } = seedFromExercise(deck, exerciseId);
     const id = uuid();
     const now = new Date().toISOString();
-    let seededGroups: Group[] = [];
-    let boundExerciseId: string | undefined;
-    if (exerciseId) {
-      const ex = deck.exercises?.find((e) => e.id === exerciseId);
-      if (!ex) throw new Error(`Exercise ${exerciseId} not found on deck ${deckId}`);
-      seededGroups = ex.groups.map((label) => ({ id: uuid(), name: label }));
-      boundExerciseId = ex.id;
-    }
     const idSet = new Set(cardIds);
     const list: List = {
       id,
@@ -108,8 +110,6 @@ export const createListsSlice: StateCreator<
       createdAt: now,
       updatedAt: now,
       groups: seededGroups,
-      // Preserve source order, skip duplicates, filter to requested IDs.
-      // Fresh cardRefs: unhidden, ungrouped, unprocessed.
       cardRefs: deck.cards
         .filter((c) => idSet.has(c.id))
         .map((c) => ({ cardId: c.id, hidden: false, groupId: null })),
@@ -143,17 +143,6 @@ export const createListsSlice: StateCreator<
       delete rest[listId];
       return { lists: rest };
     }),
-
-  reorderCards: (listId, fromIndex, toIndex) =>
-    set(
-      withList(listId, (l) => {
-        if (fromIndex === toIndex) return l;
-        const next = l.cardRefs.slice();
-        const [moved] = next.splice(fromIndex, 1);
-        next.splice(toIndex, 0, moved);
-        return { ...l, cardRefs: next };
-      })
-    ),
 
   setHidden: (listId, cardId, hidden) =>
     set(
@@ -244,14 +233,6 @@ export const createListsSlice: StateCreator<
       ...l,
       cardRefs: l.cardRefs.map((r) =>
         r.cardId === cardId ? { ...r, processed } : r,
-      ),
-    }))),
-
-  clearProcessedForScope: (listId, groupId) =>
-    set(withList(listId, (l) => ({
-      ...l,
-      cardRefs: l.cardRefs.map((r) =>
-        r.groupId === groupId ? { ...r, processed: undefined } : r,
       ),
     }))),
 

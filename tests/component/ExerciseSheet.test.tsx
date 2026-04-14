@@ -6,10 +6,10 @@ import { ExerciseSheet } from '@/components/ExerciseSheet';
 import { useAppStore } from '@/store';
 
 const baseUi = {
-  collapsedGroups: {},
   hiddenSheetOpen: false,
   activeDeckDetail: null,
-  exerciseSheetOpenByListId: {}, navDrawerOpen: false,
+  exerciseSheetOpenByListId: {},
+  navDrawerOpen: false,
 };
 
 function setup(hasExerciseOnDeck: boolean) {
