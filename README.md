@@ -1,106 +1,63 @@
-# Deck Studio
+<div align="center">
 
-A client-side, mobile-first web app for sorting and triaging card decks. Import a JSON deck, run an exercise (e.g. Priority Planner, Pyramid of Psychological Needs) over it, swipe to keep/discard, organise the keepers into folders, and copy a refined subset into a fresh list to run a different exercise on it.
+![Deck Studio](docs/banner.png)
 
-No backend. No account. All data lives in the browser (IndexedDB).
+**A mobile-first web app for sorting card decks — import once, triage with a swipe, build down into focused shortlists, export as markdown.**
+
+[Live demo](https://cards.jamesandrewscoulter.com) &nbsp;·&nbsp; [Quick start](#quick-start) &nbsp;·&nbsp; [Deck JSON format](#deck-json-format) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md)
+
+</div>
+
+---
+
+## Why
+
+If you've ever tried to prioritise something using an exercise — the Pyramid of Psychological Needs, Oblique Strategies, Values Cards, a personal retro, a year-end review — you've probably run it on paper cards, or a too-heavy Notion board, or a whiteboard full of Post-its you had to photograph before they fell off.
+
+Deck Studio is the in-between version: a web app you open on your phone, import the deck once, and run the exercise from the couch. Keep / discard / skip. Drag keepers into folders. Build a narrower list from what survives and run a different exercise on it. Export the result to markdown when you're done.
+
+No backend. No account. All data lives in your browser.
+
+## Screenshots
+
+<div align="center">
+
+|  |  |  |
+|:-:|:-:|:-:|
+| ![Decks](docs/screenshots/02-decks-populated.png) | ![List with folders](docs/screenshots/04-list-folders.png) | ![Swipe mode](docs/screenshots/06-swipe-mode.png) |
+| Imported decks | List view with folders | Swipe triage |
+| ![Folder sub-view](docs/screenshots/05-folder-subview.png) | ![Nav drawer](docs/screenshots/07-nav-drawer.png) | ![Empty lists](docs/screenshots/03-lists-empty.png) |
+| Folder sub-view | Navigation drawer | Lists index |
+
+</div>
 
 ## Features
 
-- **Decks** — import any JSON deck; flexible field mapping (title / subtitle / body / image / meta) configured at import or later
-- **Exercises** — author-defined "games" that ship inside the deck JSON: a name, narrative `instructions` (markdown), and a `groups` template that seeds the list's folders
-- **Lists** — a workspace derived from one deck. Folders (renameable, draggable, deletable), an ungrouped Cards panel, and a sub-list view per folder
-- **Swipe mode** — Tinder-style triage: Keep / Discard / Skip / Undo. Filters apply mid-session. Skipped cards rotate to the back of the queue. Kept and discarded cards are remembered so future swipes only show unprocessed cards (per scope)
-- **Metadata filters** — one chip per `meta` field on the deck. Multi-select dropdown with `all` / `none` shortcuts; ANDs across keys, ORs within a key
-- **Build new list from these cards** — copy whatever's currently visible in the ungrouped panel (after filters) into a fresh list with a different exercise
-- **Folders as sub-views** — tap a folder tile and the URL updates to `?folder=<id>`; the page reuses the list layout scoped to that folder. Back arrow returns
+- **Import any JSON deck** — flexible field mapping (`title` / `subtitle` / `body` / `image` / `meta`) configured at import or later
+- **Exercises** — author-defined "games" that ship inside the deck JSON: a name, markdown `instructions`, and a `groups` template that seeds the list's folders
+- **Lists** — a workspace derived from one deck. Folders (renameable, draggable, deletable), a Cards panel, and a sub-view per folder
+- **Swipe mode** — Tinder-style triage: Keep / Discard / Skip / Undo. Filters apply mid-session. Kept + discarded cards are remembered per scope so future swipes only show what's left to decide on
+- **Metadata filters** — one chip per `meta` field on the deck. Multi-select with `all` / `none` shortcuts; ANDs across keys, ORs within a key
+- **Build narrower lists** — copy the currently visible ungrouped cards (after filters) into a fresh list, optionally bound to a different exercise
 - **Swipe-left row actions** — Hide / Move on cards, Delete on folders
 - **Markdown export** — one-way publish to Obsidian, notes apps, anywhere text goes
 - **PWA-installable** — Add to Home Screen on iOS/Android for a standalone-app feel
 
 ## Quick start
 
+Requires Node 22 (there's an `.nvmrc`).
+
 ```bash
+git clone https://github.com/james-andrews-coulter/deck-studio.git
+cd deck-studio
+nvm use         # reads .nvmrc
 npm install
-npm run dev   # http://localhost:5173, also exposed on the LAN by default
+npm run dev     # http://localhost:5173 — also bound to your LAN
 ```
 
-Open the dev URL, then click **Import deck** and load `public/sample-deck.json` (the *School of Life: What Do You Really Want?* deck — 140 cards, six exercises) to try the app out. Or import your own JSON.
+Open the dev URL, click **Import deck**, and load `public/sample-deck.json` (*The School of Life: What Do You Really Want?* — 140 cards, six exercises) to try it. Or drop in any JSON that matches the [deck format](#deck-json-format).
 
-To use the dev server from your phone on the same Wi‑Fi: visit `http://<mac-lan-ip>:5173`.
-
-## Scripts
-
-| Script | What it does |
-|---|---|
-| `npm run dev` | Vite dev server (hot reload, binds 0.0.0.0) |
-| `npm run build` | Typecheck + bundle to `dist/` |
-| `npm run preview` | Serve the production bundle locally |
-| `npm run lint` | `tsc --noEmit` across both tsconfigs (app + build) |
-| `npm test` | Vitest unit + component tests, one pass |
-| `npm run test:watch` | Vitest watch mode |
-| `npm run test:e2e` | Playwright E2E (chromium + iPhone 13 WebKit) |
-
-## Stack
-
-- **Vite** + **React 18** + **TypeScript**
-- **Tailwind CSS** + **shadcn/ui** primitives (hand-written, no `tailwindcss-animate`)
-- **Zustand** with `persist` middleware on **IndexedDB** (`idb-keyval` adapter)
-- **React Router v6**
-- **@dnd-kit** for drag-reorder + drag-into-folder
-- **framer-motion** for swipe gestures + swipeable rows
-- **sonner** for toasts
-- **Vitest** + **@testing-library/react** for unit/component
-- **Playwright** for E2E (chromium + iPhone 13 WebKit)
-
-## Architecture
-
-```
-src/
-├── lib/                  # Pure helpers: types, importer, markdown exporter,
-│                         # markdown-lite renderer, meta filters, shuffle,
-│                         # card-field resolver, group DnD ids
-├── store/                # Zustand slices (decks, lists, UI) + IndexedDB persistence
-├── components/           # All presentational components + shadcn/ui under ui/
-└── screens/              # Route targets:
-                          #   DecksScreen, ListsScreen,
-                          #   ListScreen (handles ?folder=<id> sub-view + ?mode=swipe),
-                          #   DeckConfigureScreen
-```
-
-### Data model
-
-```ts
-type Deck = {
-  id; name; importedAt;
-  fieldMapping: { title; subtitle?; body?; image?; meta?: string[] };
-  cards: Array<{ id; fields: Record<string, unknown> }>;
-  exercises?: Array<{ id; name; instructions; groups: string[] }>;
-};
-
-type List = {
-  id; name; deckId; createdAt; updatedAt;
-  groups: Array<{ id; name }>;
-  cardRefs: Array<{
-    cardId; hidden: boolean; groupId: string | null;
-    processed?: 'keep' | 'discard';   // swipe disposition; cleared on group change
-  }>;
-  exerciseId?: string;                 // bound at creation; locked
-};
-```
-
-- Cards are referenced by id, never duplicated. Editing a card in the deck JSON updates everywhere on re-import.
-- `processed` is a swipe-session disposition. Cards marked `keep` or `discard` won't reappear in the swipe queue. Moving a card into a different folder clears its `processed` flag — each folder is its own swipe context.
-- Skip in swipe mode is session-local (rotates to the back of the queue, no persisted flag).
-
-### Routing
-
-- `/decks` — list of imported decks
-- `/lists` — index of curated lists
-- `/lists/:listId` — main list view (folders + Cards panel)
-- `/lists/:listId?folder=<groupId>` — folder sub-view (cards in that folder, no folder strip)
-- `/lists/:listId?mode=swipe` — swipe mode (queue is unprocessed cards in current scope, with active filters applied)
-
-See [`docs/superpowers/specs/`](docs/superpowers/specs/) for design specs and [`docs/superpowers/plans/`](docs/superpowers/plans/) for the implementation plans.
+To use the dev server from your phone on the same Wi-Fi, visit `http://<your-mac-lan-ip>:5173`.
 
 ## Deck JSON format
 
@@ -123,12 +80,12 @@ Three accepted shapes:
   "fieldMapping": {
     "title": "prompt",
     "subtitle": "category",
-    "meta": ["category"]            // surfaces a filter chip per key
+    "meta": ["category"]
   },
   "cards": [
     { "id": "1", "prompt": "More fun", "category": "FAMILY" }
   ],
-  "exercises": [                     // optional
+  "exercises": [
     {
       "id": "priority-planner",
       "name": "Priority Planner",
@@ -139,10 +96,48 @@ Three accepted shapes:
 }
 ```
 
-Notes:
 - `fieldMapping.meta` declares which fields become filter chips. Without it, no filters render.
-- Card IDs are preserved if present (must be strings); otherwise UUIDs are assigned. Duplicate IDs within a deck are deduped (first wins).
-- `exercises` is optional. Each exercise needs `id`, `name`, `instructions` (string, markdown subset supported), and a non-empty `groups` array.
+- Card IDs are preserved if present (strings); otherwise UUIDs are assigned. Duplicate IDs within a deck are deduped (first wins).
+- `exercises` is optional. Each exercise needs `id`, `name`, `instructions` (markdown subset), and a non-empty `groups` array.
+
+## Scripts
+
+| Script | What it does |
+|---|---|
+| `npm run dev` | Vite dev server, binds 0.0.0.0 (phone reachable on LAN) |
+| `npm run build` | Typecheck + bundle to `dist/` |
+| `npm run preview` | Serve the production bundle locally |
+| `npm run lint` | `tsc --noEmit` across both tsconfigs |
+| `npm test` | Vitest unit + component |
+| `npm run test:e2e` | Playwright (chromium + iPhone 13 WebKit) |
+
+CI runs lint + unit + e2e on every push to `main` and every PR ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+
+## Stack
+
+Vite · React 18 · TypeScript · Tailwind · [shadcn/ui](https://ui.shadcn.com/) primitives (hand-written) · Zustand + `persist` on IndexedDB (`idb-keyval`) · React Router 6 · [@dnd-kit](https://dndkit.com/) · [framer-motion](https://www.framer.com/motion/) · [sonner](https://sonner.emilkowal.ski/) · Vitest · Playwright.
+
+## Architecture
+
+```
+src/
+├── lib/          # Pure helpers: types, importer, markdown exporter,
+│                 # markdown-lite renderer, meta filters, shuffle,
+│                 # card-field resolver, group DnD ids
+├── store/        # Zustand slices (decks, lists, UI) + IndexedDB persistence
+├── components/   # Presentational components + shadcn/ui under ui/
+└── screens/      # Route targets
+```
+
+The hairy parts — iOS Safari sticky positioning, @dnd-kit gesture gating, the reasons the bottom sheet is structured the way it is — live in [`CLAUDE.md`](CLAUDE.md). It's a short, opinionated architecture doc written for a coding assistant but pretty much anyone contributing should read it.
+
+Design specs and implementation plans live in [`docs/superpowers/specs/`](docs/superpowers/specs/) and [`docs/superpowers/plans/`](docs/superpowers/plans/).
+
+## Deploy
+
+`npm run build` produces a static bundle. Anywhere that serves static files works — Vercel, Cloudflare Pages, Netlify, S3, your own nginx. No backend required.
+
+The live demo at [`cards.jamesandrewscoulter.com`](https://cards.jamesandrewscoulter.com) is deployed on Vercel; `docs/DEPLOY.md` has the steps and DNS notes.
 
 ## Mobile testing
 
@@ -155,14 +150,10 @@ The app is mobile-first and primarily tested on iPhone via Safari. To test on a 
 
 The viewport is locked at 1× zoom (`maximum-scale=1, user-scalable=no`) because pinch-zoom mid-drag breaks the DnD gestures. Form inputs are forced to 16px+ font-size to prevent iOS Safari's auto-zoom-on-focus.
 
-## Deploy
+## Contributing
 
-`npm run build` produces a static bundle in `dist/`. Drop it anywhere that serves static files (Cloudflare Pages, Vercel, Netlify, S3, your own nginx). No backend required.
-
-## CI
-
-GitHub Actions runs lint + unit tests + build + Playwright E2E on every push to `main` and every PR. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+Issues and small PRs welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) first — it's short.
 
 ## License
 
-Private. All rights reserved.
+[MIT](./LICENSE) &copy; 2026 James Andrews Coulter.
