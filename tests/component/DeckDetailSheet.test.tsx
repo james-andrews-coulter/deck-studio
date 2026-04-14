@@ -43,23 +43,11 @@ describe('DeckDetailSheet', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('renders the deck name and card count when opened', () => {
+  it('renders the deck name when opened', () => {
     const id = seedDeck();
     useAppStore.getState().setDeckDetail(id);
     renderWithRouter();
     expect(screen.getByRole('button', { name: 'Prompts' })).toBeInTheDocument();
-    expect(screen.getByText(/2 cards/i)).toBeInTheDocument();
-  });
-
-  it('pluralizes card label correctly for a single-card deck', () => {
-    const id = useAppStore.getState().addDeck({
-      name: 'Solo',
-      fieldMapping: { title: 't' },
-      cards: [{ id: 'c1', fields: { t: 'Only' } }],
-    });
-    useAppStore.getState().setDeckDetail(id);
-    renderWithRouter();
-    expect(screen.getByText(/^1 card$/i)).toBeInTheDocument();
   });
 
   it('renames the deck via the inline heading', async () => {

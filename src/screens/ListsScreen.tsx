@@ -43,16 +43,6 @@ export default function ListsScreen() {
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
-  const visibleCount = useMemo(() => {
-    const counts: Record<string, { visible: number; total: number }> = {};
-    for (const l of lists) {
-      const total = l.cardRefs.length;
-      const visible = l.cardRefs.filter((r) => !r.hidden).length;
-      counts[l.id] = { visible, total };
-    }
-    return counts;
-  }, [lists]);
-
   const decksById = useMemo(() => {
     const map: Record<string, (typeof decks)[number]> = {};
     for (const d of decks) map[d.id] = d;
@@ -124,13 +114,12 @@ export default function ListsScreen() {
         <ul className="mt-4 divide-y divide-border/60 rounded-md border">
           {lists.map((l) => {
             const deck = decksById[l.deckId];
-            const c = visibleCount[l.id];
             return (
               <li key={l.id} className="flex items-center">
                 <Link className="flex-1 p-2.5 hover:bg-muted" to={`/lists/${l.id}`}>
                   <div className="font-medium">{l.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {deck?.name ?? 'Unknown deck'} · {c.visible}/{c.total} cards ·{' '}
+                    {deck?.name ?? 'Unknown deck'} ·{' '}
                     {new Date(l.updatedAt).toLocaleDateString()}
                   </div>
                   {(() => {

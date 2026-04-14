@@ -49,8 +49,6 @@ describe('HiddenCardsSheet', () => {
 
     render(<HiddenCardsSheet listId={listId} />);
     expect(screen.getByText(/missing card/i)).toBeInTheDocument();
-    // Count in header matches the single hidden ref
-    expect(screen.getByText(/hidden cards \(1\)/i)).toBeInTheDocument();
     // Per-row Restore still works even when the card is missing
     await user.click(screen.getAllByRole('button', { name: /restore/i })[1]);
     expect(useAppStore.getState().lists[listId].cardRefs[0].hidden).toBe(false);

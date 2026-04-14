@@ -86,8 +86,8 @@ export function DeckDetailSheet() {
                 <span>Deck</span>
               )}
             </SheetTitle>
-            <SheetDescription>
-              {deck ? `${deck.cards.length} ${deck.cards.length === 1 ? 'card' : 'cards'}` : ''}
+            <SheetDescription className="sr-only">
+              Deck actions
             </SheetDescription>
             {deck && deck.exercises && deck.exercises.length > 0 && (
               <span className="mt-1 inline-block w-fit rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
