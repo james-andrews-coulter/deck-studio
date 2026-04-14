@@ -38,7 +38,7 @@ export function SwipeCard({ card, mapping, onCommit }: Props) {
           animate(x, 0, { type: 'spring', stiffness: 300 });
         }
       }}
-      className="relative mx-auto aspect-[3/4] w-[min(24rem,calc(100vw-2rem))]"
+      className="relative mx-auto aspect-[3/4] h-full max-h-full w-auto max-w-full"
       data-testid="swipe-card"
     >
       <motion.div
