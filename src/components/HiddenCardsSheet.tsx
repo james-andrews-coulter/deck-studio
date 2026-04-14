@@ -1,7 +1,5 @@
 import { useAppStore } from '@/store';
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle,
-} from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { Button } from './ui/button';
 import { CardView } from './CardView';
 
@@ -18,32 +16,47 @@ export function HiddenCardsSheet({ listId }: Props) {
   const hiddenRefs = list.cardRefs.filter((r) => r.hidden);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
-        <SheetHeader>
+      <SheetContent side="bottom" className="flex max-h-[85vh] flex-col gap-0 p-0">
+        <SheetHeader className="flex flex-row items-center justify-between border-b px-4 py-3 pr-12 text-left">
           <SheetTitle>Hidden cards</SheetTitle>
-        </SheetHeader>
-        <div className="mt-2 flex justify-end">
-          <Button size="sm" variant="outline" onClick={() => restoreAll(listId)} disabled={!hiddenRefs.length}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => restoreAll(listId)}
+            disabled={!hiddenRefs.length}
+          >
             Restore all
           </Button>
+        </SheetHeader>
+        <div
+          className="flex-1 overflow-y-auto px-4 py-3"
+          style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+        >
+          <ul className="space-y-2">
+            {hiddenRefs.map((r) => {
+              const card = deck.cards.find((c) => c.id === r.cardId);
+              return (
+                <li key={r.cardId} className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    {card ? (
+                      <CardView card={card} mapping={deck.fieldMapping} />
+                    ) : (
+                      <div className="rounded border p-2 text-sm italic text-muted-foreground">
+                        Missing card
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => setHidden(listId, r.cardId, false)}
+                  >
+                    Restore
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
-        <ul className="mt-3 space-y-2">
-          {hiddenRefs.map((r) => {
-            const card = deck.cards.find((c) => c.id === r.cardId);
-            return (
-              <li key={r.cardId} className="flex items-center gap-2">
-                <div className="flex-1">
-                  {card ? (
-                    <CardView card={card} mapping={deck.fieldMapping} />
-                  ) : (
-                    <div className="rounded border p-2 text-sm italic text-muted-foreground">Missing card</div>
-                  )}
-                </div>
-                <Button size="sm" onClick={() => setHidden(listId, r.cardId, false)}>Restore</Button>
-              </li>
-            );
-          })}
-        </ul>
       </SheetContent>
     </Sheet>
   );

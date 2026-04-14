@@ -64,8 +64,14 @@ export default function ListScreen() {
   const [newGroupFromSelectionOpen, setNewGroupFromSelectionOpen] = useState(false);
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
   const [metaFilters, setMetaFilters] = useState<Record<string, Set<string>>>({});
-  const { selectMode, selected, toggleSelect, clearSelection, toggleSelectMode } =
-    useListSelection();
+  const {
+    selectMode,
+    selected,
+    toggleSelect,
+    clearSelection,
+    selectAll,
+    toggleSelectMode,
+  } = useListSelection();
 
   const metaOptions = useMemo(
     () => (deck ? getMetaFilterOptions(deck) : {}),
@@ -385,7 +391,6 @@ export default function ListScreen() {
               </div>
             </section>
 
-          <ExerciseSheet listId={list.id} />
           <HiddenCardsSheet listId={list.id} />
           <GroupDetailSheet
             listId={list.id}
@@ -431,6 +436,7 @@ export default function ListScreen() {
             <SelectionActionBar
               count={selected.size}
               onClear={clearSelection}
+              onSelectAll={() => selectAll(ungroupedRows.map((r) => r.cardId))}
               onNewGroup={() => setNewGroupFromSelectionOpen(true)}
               onMoveTo={() => setMoveTarget({ cardIds: Array.from(selected) })}
             />
@@ -438,6 +444,10 @@ export default function ListScreen() {
         </div>
       )}
       </DndContext>
+
+      {/* Rendered regardless of mode so the drawer's "view guide" link works
+          from swipe mode too. */}
+      <ExerciseSheet listId={list.id} />
 
       <nav
         aria-label="View mode"

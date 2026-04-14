@@ -22,6 +22,11 @@ export function useListSelection() {
 
   const clearSelection = useCallback(() => setSelected(new Set()), []);
 
+  const selectAll = useCallback(
+    (cardIds: readonly string[]) => setSelected(new Set(cardIds)),
+    [],
+  );
+
   const toggleSelectMode = useCallback(() => {
     setSelectMode((on) => {
       if (on) setSelected(new Set());
@@ -34,6 +39,7 @@ export function useListSelection() {
     selected,
     toggleSelect,
     clearSelection,
+    selectAll,
     toggleSelectMode,
   };
 }

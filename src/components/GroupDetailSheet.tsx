@@ -105,7 +105,10 @@ export function GroupDetailSheet({ listId, groupId, onOpenChange }: Props) {
             </SheetTitle>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto px-3 py-3">
+          <div
+            className="flex-1 overflow-y-auto px-3 py-3"
+            style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+          >
             {rows.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 No cards in this folder yet. Drag cards onto the folder tile to add them.
