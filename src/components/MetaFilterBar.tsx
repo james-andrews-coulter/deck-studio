@@ -15,9 +15,16 @@ type Props = {
   filters: Record<string, Set<string>>;
   onToggle: (key: string, value: string) => void;
   onClear: (key: string) => void;
+  onSelectAll?: (key: string) => void;
 };
 
-export function MetaFilterBar({ optionsByKey, filters, onToggle, onClear }: Props) {
+export function MetaFilterBar({
+  optionsByKey,
+  filters,
+  onToggle,
+  onClear,
+  onSelectAll,
+}: Props) {
   const keys = Object.keys(optionsByKey).filter((k) => optionsByKey[k].length > 0);
   if (keys.length === 0) return null;
 
@@ -48,15 +55,26 @@ export function MetaFilterBar({ optionsByKey, filters, onToggle, onClear }: Prop
             <DropdownMenuContent align="start" className="max-h-72 w-52 overflow-y-auto">
               <DropdownMenuLabel className="flex items-center justify-between">
                 <span className="lowercase">{key} is</span>
-                {active && (
-                  <button
-                    type="button"
-                    onClick={() => onClear(key)}
-                    className="flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-3 w-3" aria-hidden /> clear
-                  </button>
-                )}
+                <div className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
+                  {onSelectAll && (
+                    <button
+                      type="button"
+                      onClick={() => onSelectAll(key)}
+                      className="hover:text-foreground"
+                    >
+                      all
+                    </button>
+                  )}
+                  {active && (
+                    <button
+                      type="button"
+                      onClick={() => onClear(key)}
+                      className="flex items-center gap-1 hover:text-foreground"
+                    >
+                      <X className="h-3 w-3" aria-hidden /> none
+                    </button>
+                  )}
+                </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {optionsByKey[key].map((val) => (

@@ -16,8 +16,8 @@ export function HiddenCardsSheet({ listId }: Props) {
   const hiddenRefs = list.cardRefs.filter((r) => r.hidden);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" className="flex max-h-[85vh] flex-col gap-0 p-0">
-        <SheetHeader className="flex flex-row items-center justify-between border-b px-4 py-3 pr-12 text-left">
+      <SheetContent side="bottom" className="flex max-h-[80svh] flex-col gap-0 p-0">
+        <SheetHeader className="shrink-0 flex flex-row items-center justify-between border-b px-4 py-3 pr-12 text-left">
           <SheetTitle>Hidden cards</SheetTitle>
           <Button
             size="sm"
@@ -29,7 +29,7 @@ export function HiddenCardsSheet({ listId }: Props) {
           </Button>
         </SheetHeader>
         <div
-          className="flex-1 overflow-y-auto px-4 py-3"
+          className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
           style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
         >
           <ul className="space-y-2">
@@ -57,7 +57,7 @@ export function HiddenCardsSheet({ listId }: Props) {
             })}
           </ul>
         </div>
-        <div className="border-t p-3">
+        <div className="shrink-0 border-t p-3">
           <Button className="w-full" onClick={() => setOpen(false)}>
             Done
           </Button>

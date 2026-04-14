@@ -419,49 +419,55 @@ export default function ListScreen() {
           )}
 
           {mode === 'view' && (
-            <>
-              <div className="flex items-center gap-2 border-t px-3 py-2 md:px-5">
-                {panelTitle && (
-                  <h3 className="flex-1 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    {panelTitle}
-                  </h3>
-                )}
-                {!panelTitle && <div className="flex-1" />}
-                <Button
-                  size="sm"
-                  variant={selectMode ? 'default' : 'outline'}
-                  onClick={toggleSelectMode}
-                >
-                  {selectMode ? 'Done' : 'Select'}
-                </Button>
+            <div className="flex items-center gap-2 border-t px-3 py-2 md:px-5">
+              {panelTitle ? (
+                <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  {panelTitle}
+                </h3>
+              ) : null}
+              <Button
+                size="sm"
+                variant={selectMode ? 'default' : 'outline'}
+                onClick={toggleSelectMode}
+              >
+                {selectMode ? 'Done' : 'Select'}
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                aria-label="Shuffle cards"
+                onClick={onShufflePanel}
+                disabled={panelRows.length < 2}
+              >
+                <Shuffle className="h-4 w-4" aria-hidden />
+              </Button>
+              {!inFolder && hiddenCount > 0 && (
                 <Button
                   size="icon"
                   variant="outline"
-                  aria-label="Shuffle cards"
-                  onClick={onShufflePanel}
-                  disabled={panelRows.length < 2}
+                  aria-label="Show hidden cards"
+                  onClick={() => setHiddenSheetOpen(true)}
+                  className="ml-auto"
                 >
-                  <Shuffle className="h-4 w-4" aria-hidden />
+                  <EyeOff className="h-4 w-4" aria-hidden />
                 </Button>
-                {!inFolder && hiddenCount > 0 && (
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    aria-label="Show hidden cards"
-                    onClick={() => setHiddenSheetOpen(true)}
-                  >
-                    <EyeOff className="h-4 w-4" aria-hidden />
-                  </Button>
-                )}
-              </div>
-              <MetaFilterBar
-                optionsByKey={metaOptions}
-                filters={metaFilters}
-                onToggle={toggleMetaFilter}
-                onClear={clearMetaFilter}
-              />
-            </>
+              )}
+            </div>
           )}
+          {/* Filters apply to both view and swipe so the user can refine the
+              swipe queue mid-session without leaving the screen. */}
+          <MetaFilterBar
+            optionsByKey={metaOptions}
+            filters={metaFilters}
+            onToggle={toggleMetaFilter}
+            onClear={clearMetaFilter}
+            onSelectAll={(key) => {
+              setMetaFilters((prev) => ({
+                ...prev,
+                [key]: new Set(metaOptions[key] ?? []),
+              }));
+            }}
+          />
         </div>
 
         {mode === 'swipe' ? (

@@ -38,12 +38,15 @@ export function DeckDetailSheet() {
 
   const open = !!deckId && !!deck;
 
-  // Reset the inline name input whenever the sheet opens for a different deck
+  // Reset all sheet-local state whenever the sheet opens for a different deck
+  // (defensive — including confirmDeleteOpen, which would otherwise leak
+  // across deck re-openings if a previous open session left it true).
   useEffect(() => {
     if (deckId) {
       setListName('');
       setExerciseId('');
       setAutoFillSource(null);
+      setConfirmDeleteOpen(false);
     }
   }, [deckId]);
 
@@ -51,9 +54,13 @@ export function DeckDetailSheet() {
 
   const onCreateList = () => {
     if (!deckId || !listName.trim()) return;
-    const newListId = createList(deckId, listName.trim(), exerciseId || undefined);
-    closeSheet();
-    navigate(`/lists/${newListId}`);
+    try {
+      const newListId = createList(deckId, listName.trim(), exerciseId || undefined);
+      closeSheet();
+      navigate(`/lists/${newListId}`);
+    } catch (err) {
+      console.error('[deck-studio] createList failed', err);
+    }
   };
 
   const onConfigure = () => {
@@ -154,7 +161,14 @@ export function DeckDetailSheet() {
                   })()}
                 </label>
               )}
-              <Button onClick={onCreateList} disabled={!listName.trim()}>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCreateList();
+                }}
+                disabled={!listName.trim()}
+                className="w-full"
+              >
                 Create list
               </Button>
             </div>
@@ -163,14 +177,18 @@ export function DeckDetailSheet() {
               <Button variant="outline" className="w-full" onClick={onConfigure}>
                 Re-configure mapping
               </Button>
-              {/* View all cards — deferred for v1 (spec §6.2) */}
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={() => setConfirmDeleteOpen(true)}
+              {/* Delete deck demoted from a full-width red bar to a small text
+                  link to prevent accidental taps on mobile. */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmDeleteOpen(true);
+                }}
+                className="block w-full pt-2 text-center text-xs text-red-600 hover:underline"
               >
                 Delete deck
-              </Button>
+              </button>
             </div>
           </div>
         </SheetContent>

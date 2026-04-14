@@ -20,13 +20,13 @@ export function ExerciseSheet({ listId }: Props) {
     <Sheet open={open} onOpenChange={(o) => setOpen(listId, o)}>
       <SheetContent
         side="bottom"
-        className="flex max-h-[90vh] flex-col gap-0 p-0"
+        className="flex max-h-[80svh] flex-col gap-0 p-0"
       >
-        <SheetHeader className="border-b px-4 py-3 pr-12 text-left">
+        <SheetHeader className="shrink-0 border-b px-4 py-3 pr-12 text-left">
           <SheetTitle>{exercise.name}</SheetTitle>
         </SheetHeader>
         <div
-          className="flex-1 space-y-4 overflow-y-auto px-4 py-4 text-sm leading-relaxed"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 text-sm leading-relaxed"
           style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
         >
           <div className="space-y-2">{renderMarkdownLite(exercise.instructions)}</div>
@@ -49,7 +49,7 @@ export function ExerciseSheet({ listId }: Props) {
             </p>
           </div>
         </div>
-        <div className="border-t p-3">
+        <div className="shrink-0 border-t p-3">
           <Button className="w-full" onClick={() => setOpen(listId, false)}>
             Done
           </Button>
