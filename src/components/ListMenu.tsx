@@ -15,10 +15,17 @@ import { exportListFile } from '@/lib/exportListFile';
 
 type Props = {
   listId: string;
-  onBuildFromKept?: () => void;
+  /** How many cards are currently visible in the ungrouped panel (0 if not on
+   * the main list view). The Build new list action is hidden when zero. */
+  ungroupedVisibleCount?: number;
+  onBuildFromUngrouped?: () => void;
 };
 
-export function ListMenu({ listId, onBuildFromKept }: Props) {
+export function ListMenu({
+  listId,
+  ungroupedVisibleCount = 0,
+  onBuildFromUngrouped,
+}: Props) {
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
   const clearAllGroups = useAppStore((s) => s.clearAllGroups);
@@ -31,7 +38,6 @@ export function ListMenu({ listId, onBuildFromKept }: Props) {
   const exercise = list.exerciseId
     ? deck?.exercises?.find((e) => e.id === list.exerciseId)
     : undefined;
-  const keptCount = list.cardRefs.filter((r) => r.processed === 'keep').length;
 
   const onExport = () => {
     if (!deck) return;
@@ -56,13 +62,13 @@ export function ListMenu({ listId, onBuildFromKept }: Props) {
               <DropdownMenuSeparator />
             </>
           )}
-          {onBuildFromKept && (
+          {onBuildFromUngrouped && (
             <DropdownMenuItem
-              onClick={onBuildFromKept}
-              disabled={keptCount === 0}
+              onClick={onBuildFromUngrouped}
+              disabled={ungroupedVisibleCount === 0}
             >
               <Copy className="mr-2 h-4 w-4" aria-hidden />
-              Build new list from kept
+              Build new list from these cards
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={onExport} disabled={!deck}>

@@ -12,11 +12,18 @@ import { useAppStore } from '@/store';
 
 type Props = {
   listId: string;
+  /** Card IDs that are currently visible in the ungrouped panel (post-filter). */
+  sourceCardIds: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function BuildFromKeptDialog({ listId, open, onOpenChange }: Props) {
+export function BuildFromUngroupedDialog({
+  listId,
+  sourceCardIds,
+  open,
+  onOpenChange,
+}: Props) {
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
   const createListFromCards = useAppStore((s) => s.createListFromCards);
@@ -34,8 +41,8 @@ export function BuildFromKeptDialog({ listId, open, onOpenChange }: Props) {
   }, [open]);
 
   if (!list || !deck) return null;
-  const keptRefs = list.cardRefs.filter((r) => r.processed === 'keep');
   const exercises = deck.exercises ?? [];
+  const count = sourceCardIds.length;
 
   const onExerciseChange = (nextId: string) => {
     setExerciseId(nextId);
@@ -48,12 +55,11 @@ export function BuildFromKeptDialog({ listId, open, onOpenChange }: Props) {
   };
 
   const onCreate = () => {
-    if (!name.trim() || keptRefs.length === 0) return;
-    const keptIds = keptRefs.map((r) => r.cardId);
+    if (!name.trim() || count === 0) return;
     const id = createListFromCards(
       list.deckId,
       name.trim(),
-      keptIds,
+      sourceCardIds,
       exerciseId || undefined,
     );
     onOpenChange(false);
@@ -64,13 +70,14 @@ export function BuildFromKeptDialog({ listId, open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Build new list from kept cards</DialogTitle>
+          <DialogTitle>Build new list from these cards</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Creates a fresh list from the {keptRefs.length}{' '}
-          {keptRefs.length === 1 ? 'card' : 'cards'} you've kept. The new list
-          starts ungrouped with a clean swipe state so you can run a different
-          exercise over the same subset.
+          Creates a fresh list from the {count}{' '}
+          {count === 1 ? 'card' : 'cards'} currently visible in the ungrouped
+          panel (after any active filters). The new list starts ungrouped with
+          a clean swipe state so you can run a different exercise over the
+          same subset.
         </p>
         {exercises.length > 0 && (
           <label className="mt-3 block text-sm font-medium">
@@ -108,7 +115,7 @@ export function BuildFromKeptDialog({ listId, open, onOpenChange }: Props) {
           </Button>
           <Button
             onClick={onCreate}
-            disabled={!name.trim() || keptRefs.length === 0}
+            disabled={!name.trim() || count === 0}
           >
             Create list
           </Button>

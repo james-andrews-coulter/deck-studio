@@ -32,7 +32,7 @@ import { GroupNameInput } from '@/components/GroupNameInput';
 import { GroupDropZone } from '@/components/GroupDropZone';
 import { MetaFilterBar } from '@/components/MetaFilterBar';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { BuildFromKeptDialog } from '@/components/BuildFromKeptDialog';
+import { BuildFromUngroupedDialog } from '@/components/BuildFromUngroupedDialog';
 import { cardMatchesFilters, getMetaFilterOptions } from '@/lib/metaFilters';
 import { shuffle } from '@/lib/shuffle';
 import { useListSelection } from '@/hooks/useListSelection';
@@ -68,7 +68,7 @@ export default function ListScreen() {
   const [newGroupFromSelectionOpen, setNewGroupFromSelectionOpen] = useState(false);
   const [metaFilters, setMetaFilters] = useState<Record<string, Set<string>>>({});
   const [confirmDeleteFolder, setConfirmDeleteFolder] = useState(false);
-  const [buildFromKeptOpen, setBuildFromKeptOpen] = useState(false);
+  const [buildFromUngroupedOpen, setBuildFromUngroupedOpen] = useState(false);
   const {
     selectMode,
     selected,
@@ -368,7 +368,8 @@ export default function ListScreen() {
             ) : (
               <ListMenu
                 listId={list.id}
-                onBuildFromKept={() => setBuildFromKeptOpen(true)}
+                ungroupedVisibleCount={inFolder ? 0 : panelRows.length}
+                onBuildFromUngrouped={() => setBuildFromUngroupedOpen(true)}
               />
             )}
           </header>
@@ -503,10 +504,11 @@ export default function ListScreen() {
 
       <ExerciseSheet listId={list.id} />
       <HiddenCardsSheet listId={list.id} />
-      <BuildFromKeptDialog
+      <BuildFromUngroupedDialog
         listId={list.id}
-        open={buildFromKeptOpen}
-        onOpenChange={setBuildFromKeptOpen}
+        sourceCardIds={panelRows.map((r) => r.cardId)}
+        open={buildFromUngroupedOpen}
+        onOpenChange={setBuildFromUngroupedOpen}
       />
       <MoveToGroupDialog
         open={!!moveTarget}
