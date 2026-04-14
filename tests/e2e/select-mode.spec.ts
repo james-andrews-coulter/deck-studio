@@ -33,11 +33,12 @@ test('select mode: bulk-create a group from checked cards', async ({ page }) => 
   await page.getByRole('textbox', { name: /group name/i }).fill('Warm-ups');
   await page.getByRole('button', { name: /create group/i }).click();
 
-  // Group heading renders and contains Alpha + Beta (Gamma stays in Ungrouped)
-  await expect(page.getByText('Warm-ups')).toBeVisible();
-  const warmupsRegion = page.locator('section').filter({ hasText: 'Warm-ups' });
-  await expect(warmupsRegion.getByText('Alpha')).toBeVisible();
-  await expect(warmupsRegion.getByText('Beta')).toBeVisible();
-  // Gamma is still under Ungrouped
-  await expect(page.getByText(/^ungrouped$/i)).toBeVisible();
+  // Folder tile for the new group renders (uppercase label)
+  const tile = page.getByRole('button', { name: /warm-ups/i });
+  await expect(tile).toBeVisible();
+  // Open the folder to verify its contents
+  await tile.click();
+  await expect(page.getByRole('heading', { name: /warm-ups/i })).toBeVisible();
+  await expect(page.getByText('Alpha')).toBeVisible();
+  await expect(page.getByText('Beta')).toBeVisible();
 });
