@@ -14,7 +14,6 @@ import {
   SortableContext,
   verticalListSortingStrategy,
   sortableKeyboardCoordinates,
-  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
@@ -277,10 +276,10 @@ export default function ListScreen() {
             collisionDetection={closestCenter}
             onDragEnd={onDragEnd}
           >
-            <div className="flex items-center gap-2 overflow-x-auto border-t px-3 py-2 md:px-5">
+            <div className="flex max-h-[40svh] flex-col gap-1.5 overflow-y-auto border-t px-3 py-2 md:px-5">
               <SortableContext
                 items={list.groups.map((g) => `${GROUP_HEADER_PREFIX}${g.id}`)}
-                strategy={rectSortingStrategy}
+                strategy={verticalListSortingStrategy}
               >
                 {list.groups.map((g) => (
                   <GroupTile
@@ -296,7 +295,7 @@ export default function ListScreen() {
                   size="sm"
                   variant="outline"
                   onClick={() => setGroupDraft('New folder')}
-                  className="shrink-0"
+                  className="self-start"
                 >
                   + Folder
                 </Button>
@@ -311,7 +310,7 @@ export default function ListScreen() {
                     if (e.key === 'Escape') setGroupDraft(null);
                   }}
                   aria-label="New folder name"
-                  className="shrink-0 rounded-md border bg-background px-2 py-1 text-base"
+                  className="rounded-md border bg-background px-2 py-1 text-base"
                 />
               )}
             </div>

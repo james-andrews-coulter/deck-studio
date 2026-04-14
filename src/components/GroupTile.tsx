@@ -32,25 +32,25 @@ export function GroupTile({ listId, group, onOpen }: Props) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        'relative flex min-w-[9rem] shrink-0 items-center gap-2 rounded-xl border-2 bg-card p-2.5 transition-colors',
+        'relative flex w-full items-center gap-2 rounded-lg border bg-card px-2 py-1.5 transition-colors',
         isOver ? 'border-primary bg-primary/5' : 'border-border',
       )}
     >
       <button
         type="button"
         onClick={onOpen}
-        className="flex flex-1 items-center gap-2 text-left"
+        className="flex flex-1 items-center gap-2 truncate text-left"
       >
-        <div className="relative">
-          <Folder className="h-5 w-5 text-muted-foreground" aria-hidden />
+        <div className="relative shrink-0">
+          <Folder className="h-4 w-4 text-muted-foreground" aria-hidden />
           {hasCards && (
             <span
               aria-hidden
-              className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-primary"
+              className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-primary"
             />
           )}
         </div>
-        <span className="line-clamp-2 break-words text-xs font-semibold uppercase tracking-[0.1em]">
+        <span className="truncate text-xs font-semibold uppercase tracking-[0.1em]">
           {group.name}
         </span>
       </button>
@@ -60,7 +60,7 @@ export function GroupTile({ listId, group, onOpen }: Props) {
         role="button"
         tabIndex={0}
         aria-label={`Drag to reorder ${group.name}`}
-        className="flex h-7 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+        className="flex h-7 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
       >
         <GripVertical className="h-4 w-4" aria-hidden />
       </div>
