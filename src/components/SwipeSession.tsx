@@ -3,36 +3,77 @@ import { SwipeCard } from './SwipeCard';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store';
 import { shuffle } from '@/lib/shuffle';
+import { cardMatchesFilters } from '@/lib/metaFilters';
 
-type Props = { listId: string; onDone: () => void };
+type Props = {
+  listId: string;
+  onDone: () => void;
+  metaFilters?: Record<string, Set<string>>;
+};
 
-export function SwipeSession({ listId, onDone }: Props) {
+export function SwipeSession({ listId, onDone, metaFilters = {} }: Props) {
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
   const setHidden = useAppStore((s) => s.setHidden);
 
-  const initialQueue = useMemo(
+  // Signature captures filter selections so the queue rebuilds when the user
+  // toggles chips mid-session (undo stack resets along with it).
+  const filterSignature = useMemo(
     () =>
-      list && deck
-        ? shuffle(
-            list.cardRefs
-              .filter((r) => !r.hidden && deck.cards.some((c) => c.id === r.cardId))
-              .map((r) => r.cardId),
-          )
-        : [],
-    // Freeze queue at session start — intentionally do not depend on list.cardRefs.
+      Object.entries(metaFilters)
+        .filter(([, s]) => s.size > 0)
+        .map(([k, s]) => `${k}:${Array.from(s).sort().join(',')}`)
+        .sort()
+        .join('|'),
+    [metaFilters],
+  );
+
+  const initialQueue = useMemo(
+    () => {
+      if (!list || !deck) return [];
+      return shuffle(
+        list.cardRefs
+          .filter((r) => {
+            if (r.hidden) return false;
+            const card = deck.cards.find((c) => c.id === r.cardId);
+            if (!card) return false;
+            return cardMatchesFilters(card, metaFilters);
+          })
+          .map((r) => r.cardId),
+      );
+    },
+    // Freeze queue at session start (and when filters change). Intentionally do
+    // not depend on list.cardRefs so ordering edits elsewhere don't shuffle mid-session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [listId],
+    [listId, filterSignature],
   );
   const [index, setIndex] = useState(0);
   const [undoStack, setUndoStack] = useState<
     Array<{ cardId: string; direction: 'keep' | 'discard' }>
   >([]);
 
+  // Reset when filters change mid-session
+  useMemo(() => {
+    setIndex(0);
+    setUndoStack([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterSignature]);
+
   if (!list || !deck) return null;
 
   const total = initialQueue.length;
   const remaining = total - index;
+
+  if (total === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 p-10 text-center">
+        <p className="text-sm text-muted-foreground">
+          No cards match the current filters.
+        </p>
+        <Button onClick={onDone}>Back to list</Button>
+      </div>
+    );
+  }
 
   if (remaining <= 0) {
     return (
@@ -44,8 +85,6 @@ export function SwipeSession({ listId, onDone }: Props) {
   }
 
   const cardId = initialQueue[index];
-  // initialQueue was filtered to only contain IDs that resolve in the deck, so
-  // `card` is guaranteed to be present for any queue position. Fall back defensively.
   const card = deck.cards.find((c) => c.id === cardId);
 
   const commit = (dir: 'keep' | 'discard') => {

@@ -14,13 +14,15 @@ import {
   verticalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { Trash2 } from 'lucide-react';
+import { EyeOff, FolderInput, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { Button } from './ui/button';
 import { ConfirmDialog } from './ConfirmDialog';
 import { CardView } from './CardView';
 import { SortableCard } from './SortableCard';
+import { SwipeableRow } from './SwipeableRow';
+import { MoveToGroupDialog } from './MoveToGroupDialog';
 
 type Props = {
   listId: string;
@@ -35,10 +37,12 @@ export function GroupDetailSheet({ listId, groupId, onOpenChange }: Props) {
   const renameGroup = useAppStore((s) => s.renameGroup);
   const deleteGroup = useAppStore((s) => s.deleteGroup);
   const setCardRefs = useAppStore((s) => s.setCardRefs);
+  const setHidden = useAppStore((s) => s.setHidden);
   const moveCardToGroup = useAppStore((s) => s.moveCardToGroup);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [moveTarget, setMoveTarget] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -75,7 +79,7 @@ export function GroupDetailSheet({ listId, groupId, onOpenChange }: Props) {
     <>
       <Sheet open={!!groupId} onOpenChange={onOpenChange}>
         <SheetContent side="bottom" className="flex max-h-[90vh] flex-col gap-0 p-0">
-          <SheetHeader className="border-b px-4 py-3 text-left">
+          <SheetHeader className="border-b px-4 py-3 pr-12 text-left">
             <SheetTitle className="text-base font-bold uppercase tracking-[0.14em]">
               {editing ? (
                 <input
@@ -116,30 +120,35 @@ export function GroupDetailSheet({ listId, groupId, onOpenChange }: Props) {
                   items={rows.map((r) => r.cardId)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <ul className="space-y-2">
+                  <ul className="space-y-1.5">
                     {rows.map((r) => {
                       const card = deck.cards.find((c) => c.id === r.cardId);
                       return (
                         <SortableCard key={r.cardId} id={r.cardId}>
-                          <div className="flex items-stretch gap-1">
-                            <div className="flex-1">
-                              {card ? (
-                                <CardView card={card} mapping={deck.fieldMapping} />
-                              ) : (
-                                <div className="rounded border p-2 text-sm italic text-muted-foreground">
-                                  Missing card
-                                </div>
-                              )}
-                            </div>
-                            <button
-                              type="button"
-                              aria-label="Remove from folder"
-                              onClick={() => moveCardToGroup(listId, r.cardId, null)}
-                              className="flex w-10 shrink-0 items-center justify-center rounded-md text-xs text-muted-foreground hover:bg-muted"
-                            >
-                              Out
-                            </button>
-                          </div>
+                          <SwipeableRow
+                            actions={[
+                              {
+                                label: 'Hide',
+                                icon: EyeOff,
+                                onClick: () => setHidden(listId, r.cardId, true),
+                                className: 'bg-amber-500',
+                              },
+                              {
+                                label: 'Move',
+                                icon: FolderInput,
+                                onClick: () => setMoveTarget(r.cardId),
+                                className: 'bg-sky-600',
+                              },
+                            ]}
+                          >
+                            {card ? (
+                              <CardView card={card} mapping={deck.fieldMapping} />
+                            ) : (
+                              <div className="rounded border p-2 text-sm italic text-muted-foreground">
+                                Missing card
+                              </div>
+                            )}
+                          </SwipeableRow>
                         </SortableCard>
                       );
                     })}
@@ -172,6 +181,15 @@ export function GroupDetailSheet({ listId, groupId, onOpenChange }: Props) {
           deleteGroup(listId, group.id);
           setConfirmDeleteOpen(false);
           onOpenChange(false);
+        }}
+      />
+      <MoveToGroupDialog
+        open={!!moveTarget}
+        onOpenChange={(o) => !o && setMoveTarget(null)}
+        groups={list.groups}
+        onPick={(targetGroupId) => {
+          if (moveTarget) moveCardToGroup(listId, moveTarget, targetGroupId);
+          setMoveTarget(null);
         }}
       />
     </>

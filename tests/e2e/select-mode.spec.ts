@@ -33,10 +33,11 @@ test('select mode: bulk-create a group from checked cards', async ({ page }) => 
   await page.getByRole('textbox', { name: /group name/i }).fill('Warm-ups');
   await page.getByRole('button', { name: /create group/i }).click();
 
-  // Folder tile for the new group renders (uppercase label)
-  const tile = page.getByRole('button', { name: /warm-ups/i });
+  // Folder tile for the new group renders (uppercase label). The tap target
+  // is the content button; a separate drag-grip button sits next to it, so
+  // match exactly by name.
+  const tile = page.getByRole('button', { name: 'Warm-ups', exact: true });
   await expect(tile).toBeVisible();
-  // Open the folder to verify its contents
   await tile.click();
   await expect(page.getByRole('heading', { name: /warm-ups/i })).toBeVisible();
   await expect(page.getByText('Alpha')).toBeVisible();

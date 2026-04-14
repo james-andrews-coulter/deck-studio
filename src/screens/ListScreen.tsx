@@ -260,8 +260,8 @@ export default function ListScreen() {
 
   return (
     <div>
-      <header className="sticky top-0 z-20 border-b bg-background px-3 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md md:px-5">
-        <div className="flex items-center gap-2 py-2">
+      <div className="sticky top-0 z-20 border-b bg-background supports-[backdrop-filter]:bg-background/90 supports-[backdrop-filter]:backdrop-blur-md">
+        <header className="flex items-center gap-2 px-3 py-2 md:px-5">
           <NavHamburger />
           <div className="min-w-0 flex-1">
             <InlineRenameHeading
@@ -270,12 +270,68 @@ export default function ListScreen() {
             />
           </div>
           <ListMenu listId={list.id} />
-        </div>
-      </header>
+        </header>
+        {mode === 'view' && (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={onDragEnd}
+          >
+            <div className="flex items-center gap-2 overflow-x-auto border-t px-3 py-2 md:px-5">
+              <SortableContext
+                items={list.groups.map((g) => `${GROUP_HEADER_PREFIX}${g.id}`)}
+                strategy={rectSortingStrategy}
+              >
+                {list.groups.map((g) => (
+                  <GroupTile
+                    key={g.id}
+                    listId={list.id}
+                    group={g}
+                    onOpen={() => setOpenGroupId(g.id)}
+                  />
+                ))}
+              </SortableContext>
+              {groupDraft === null ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setGroupDraft('New folder')}
+                  className="shrink-0"
+                >
+                  + Folder
+                </Button>
+              ) : (
+                <input
+                  autoFocus
+                  value={groupDraft}
+                  onChange={(e) => setGroupDraft(e.target.value)}
+                  onBlur={commitNewGroup}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitNewGroup();
+                    if (e.key === 'Escape') setGroupDraft(null);
+                  }}
+                  aria-label="New folder name"
+                  className="shrink-0 rounded-md border bg-background px-2 py-1 text-base"
+                />
+              )}
+            </div>
+          </DndContext>
+        )}
+      </div>
 
       {mode === 'swipe' ? (
         <div className="pb-20">
-          <SwipeSession listId={list.id} onDone={() => setMode('view')} />
+          <MetaFilterBar
+            optionsByKey={metaOptions}
+            filters={metaFilters}
+            onToggle={toggleMetaFilter}
+            onClear={clearMetaFilter}
+          />
+          <SwipeSession
+            listId={list.id}
+            metaFilters={metaFilters}
+            onDone={() => setMode('view')}
+          />
         </div>
       ) : (
         <div className="flex flex-col gap-3 p-3 pb-20 md:p-5 md:pb-20">
@@ -284,61 +340,7 @@ export default function ListScreen() {
             collisionDetection={closestCenter}
             onDragEnd={onDragEnd}
           >
-            {/* Folders panel */}
-            <section className="rounded-xl border bg-card">
-              <div className="flex items-center gap-2 border-b px-3 py-2">
-                <h3 className="flex-1 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                  Folders
-                </h3>
-                {groupDraft === null ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setGroupDraft('New folder')}
-                  >
-                    + New folder
-                  </Button>
-                ) : (
-                  <input
-                    autoFocus
-                    value={groupDraft}
-                    onChange={(e) => setGroupDraft(e.target.value)}
-                    onBlur={commitNewGroup}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') commitNewGroup();
-                      if (e.key === 'Escape') setGroupDraft(null);
-                    }}
-                    aria-label="New folder name"
-                    className="rounded-md border bg-background px-2 py-1 text-base"
-                  />
-                )}
-              </div>
-              <div className="max-h-[38svh] overflow-y-auto p-3">
-                {list.groups.length === 0 ? (
-                  <p className="py-6 text-center text-xs text-muted-foreground">
-                    No folders yet. Create one, then drag cards onto it.
-                  </p>
-                ) : (
-                  <SortableContext
-                    items={list.groups.map((g) => `${GROUP_HEADER_PREFIX}${g.id}`)}
-                    strategy={rectSortingStrategy}
-                  >
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                      {list.groups.map((g) => (
-                        <GroupTile
-                          key={g.id}
-                          listId={list.id}
-                          group={g}
-                          onOpen={() => setOpenGroupId(g.id)}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                )}
-              </div>
-            </section>
-
-            {/* Ungrouped panel */}
+            {/* Cards panel */}
             <section className="rounded-xl border bg-card">
               <div className="flex items-center gap-2 border-b px-3 py-2">
                 <h3 className="flex-1 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
@@ -368,7 +370,7 @@ export default function ListScreen() {
                 onToggle={toggleMetaFilter}
                 onClear={clearMetaFilter}
               />
-              <div className="max-h-[50svh] overflow-y-auto p-3">
+              <div className="p-3">
                 <GroupDropZone groupId={null}>
                   <SortableContext
                     items={ungroupedRows.map((r) => r.cardId)}
