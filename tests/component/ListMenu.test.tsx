@@ -31,7 +31,7 @@ describe('ListMenu', () => {
 
     await user.click(screen.getByRole('button', { name: /list actions/i }));
     expect(screen.getByRole('menuitem', { name: /export as markdown/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /clear all groups/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /clear all folders/i })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /delete list/i })).toBeInTheDocument();
   });
 });

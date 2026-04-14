@@ -32,6 +32,7 @@ import { GroupNameInput } from '@/components/GroupNameInput';
 import { GroupDropZone } from '@/components/GroupDropZone';
 import { MetaFilterBar } from '@/components/MetaFilterBar';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { BuildFromKeptDialog } from '@/components/BuildFromKeptDialog';
 import { cardMatchesFilters, getMetaFilterOptions } from '@/lib/metaFilters';
 import { shuffle } from '@/lib/shuffle';
 import { useListSelection } from '@/hooks/useListSelection';
@@ -67,6 +68,7 @@ export default function ListScreen() {
   const [newGroupFromSelectionOpen, setNewGroupFromSelectionOpen] = useState(false);
   const [metaFilters, setMetaFilters] = useState<Record<string, Set<string>>>({});
   const [confirmDeleteFolder, setConfirmDeleteFolder] = useState(false);
+  const [buildFromKeptOpen, setBuildFromKeptOpen] = useState(false);
   const {
     selectMode,
     selected,
@@ -227,26 +229,30 @@ export default function ListScreen() {
 
   const onShufflePanel = () => {
     if (panelRows.length < 2) return;
-    const shuffledIds = shuffle(panelRows.map((r) => r.cardId));
-    const refs = list.cardRefs.slice();
-    // Walk refs in order; every time we hit one that belongs to the current
-    // panel, replace it with the next entry from the shuffled id list.
-    let cursor = 0;
-    for (let i = 0; i < refs.length; i++) {
-      const r = refs[i];
+    // Pull in-scope-and-visible positions + their refs out of list.cardRefs,
+    // shuffle the refs, and write them back into the same positions.
+    const originals = list.cardRefs;
+    const positions: number[] = [];
+    for (let i = 0; i < originals.length; i++) {
+      const r = originals[i];
+      if (r.hidden) continue;
       const inScope = inFolder
         ? r.groupId === scopedGroup!.id
         : r.groupId === null;
-      if (!inScope || r.hidden) continue;
-      const card = deck.cards.find((c) => c.id === r.cardId);
-      if (activeFilterCount > 0 && card && !cardMatchesFilters(card, metaFilters))
-        continue;
-      const nextId = shuffledIds[cursor++];
-      if (!nextId) break;
-      const nextRef = refs.find((x) => x.cardId === nextId);
-      if (nextRef) refs[i] = nextRef;
+      if (!inScope) continue;
+      if (activeFilterCount > 0) {
+        const card = deck.cards.find((c) => c.id === r.cardId);
+        if (!card || !cardMatchesFilters(card, metaFilters)) continue;
+      }
+      positions.push(i);
     }
-    setCardRefs(list.id, refs);
+    if (positions.length < 2) return;
+    const shuffledRefs = shuffle(positions.map((i) => originals[i]));
+    const next = originals.slice();
+    positions.forEach((idx, n) => {
+      next[idx] = shuffledRefs[n];
+    });
+    setCardRefs(list.id, next);
   };
 
   const onHideSelected = () => {
@@ -320,8 +326,10 @@ export default function ListScreen() {
         onDragEnd={onDragEnd}
       >
         {/* Everything above the scrolling card list is one sticky block so
-            header + folder strip + panel chrome + filters all stay visible. */}
-        <div className="sticky top-0 z-20 border-b bg-background supports-[backdrop-filter]:bg-background/90 supports-[backdrop-filter]:backdrop-blur-md">
+            header + folder strip + panel chrome + filters all stay visible.
+            Solid bg — avoids backdrop-filter creating a stacking context
+            that fights with Radix portaled dropdowns on iOS Safari. */}
+        <div className="sticky top-0 z-20 border-b bg-background">
           <header className="flex items-center gap-2 px-3 py-2 md:px-5">
             {inFolder ? (
               <Button
@@ -358,7 +366,10 @@ export default function ListScreen() {
                 <Trash2 className="h-5 w-5 text-red-600" aria-hidden />
               </Button>
             ) : (
-              <ListMenu listId={list.id} />
+              <ListMenu
+                listId={list.id}
+                onBuildFromKept={() => setBuildFromKeptOpen(true)}
+              />
             )}
           </header>
 
@@ -486,6 +497,11 @@ export default function ListScreen() {
 
       <ExerciseSheet listId={list.id} />
       <HiddenCardsSheet listId={list.id} />
+      <BuildFromKeptDialog
+        listId={list.id}
+        open={buildFromKeptOpen}
+        onOpenChange={setBuildFromKeptOpen}
+      />
       <MoveToGroupDialog
         open={!!moveTarget}
         onOpenChange={(o) => !o && setMoveTarget(null)}
@@ -549,7 +565,7 @@ export default function ListScreen() {
 
       <nav
         aria-label="View mode"
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-2 border-t bg-background supports-[backdrop-filter]:bg-background/90 supports-[backdrop-filter]:backdrop-blur-md"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-2 border-t bg-background"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <button

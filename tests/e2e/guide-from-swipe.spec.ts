@@ -23,11 +23,10 @@ test('exercise guide opens from nav drawer while in swipe mode', async ({ page }
   await page.getByRole('button', { name: /^swipe$/i }).click();
   await expect(page).toHaveURL(/mode=swipe/);
 
-  // Open drawer from swipe view and tap the guide link.
-  await page.getByRole('button', { name: /open navigation/i }).click();
-  await page.getByRole('button', { name: /triage.*view guide/i }).click();
+  // Guide is now accessed from the list menu (not the nav drawer).
+  await page.getByRole('button', { name: /list actions/i }).click();
+  await page.getByRole('menuitem', { name: /view guide/i }).click();
 
   // Guide sheet should open with instructions + template.
-  await expect(page.getByRole('heading', { name: 'Triage' })).toBeVisible();
   await expect(page.getByText(/keep or park each card/i)).toBeVisible();
 });

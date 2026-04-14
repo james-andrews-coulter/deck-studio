@@ -1,5 +1,6 @@
 import { useAppStore } from '@/store';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
+import { Button } from './ui/button';
 import { renderMarkdownLite } from '@/lib/markdownLite';
 
 type Props = { listId: string };
@@ -19,13 +20,16 @@ export function ExerciseSheet({ listId }: Props) {
     <Sheet open={open} onOpenChange={(o) => setOpen(listId, o)}>
       <SheetContent
         side="bottom"
-        className="max-h-[85vh] overflow-y-auto md:right-0 md:left-auto md:ml-auto md:max-w-md md:rounded-tl-xl md:rounded-tr-none md:rounded-bl-none md:rounded-br-none md:h-[85vh] md:max-h-none md:border-l md:border-r-0"
+        className="flex max-h-[90vh] flex-col gap-0 p-0"
       >
-        <SheetHeader>
+        <SheetHeader className="border-b px-4 py-3 pr-12 text-left">
           <SheetTitle>{exercise.name}</SheetTitle>
         </SheetHeader>
-        <div className="mt-3 space-y-4 text-sm leading-relaxed">
-          <div>{renderMarkdownLite(exercise.instructions)}</div>
+        <div
+          className="flex-1 space-y-4 overflow-y-auto px-4 py-4 text-sm leading-relaxed"
+          style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+        >
+          <div className="space-y-2">{renderMarkdownLite(exercise.instructions)}</div>
           <div>
             <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Template
@@ -41,9 +45,14 @@ export function ExerciseSheet({ listId }: Props) {
               ))}
             </ul>
             <p className="mt-3 text-xs text-muted-foreground">
-              Your list's groups can differ — this is the original exercise template.
+              Your list's folders can differ — this is the original exercise template.
             </p>
           </div>
+        </div>
+        <div className="border-t p-3">
+          <Button className="w-full" onClick={() => setOpen(listId, false)}>
+            Done
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

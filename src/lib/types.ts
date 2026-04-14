@@ -36,6 +36,12 @@ export type CardRef = {
   cardId: string;
   hidden: boolean;
   groupId: string | null;
+  /**
+   * Swipe-session disposition. Cleared when a card moves to a different
+   * group (treating each group as its own swipe context). Skip is a
+   * session-local queue ordering hint and is not persisted here.
+   */
+  processed?: 'keep' | 'discard';
 };
 
 export type List = {

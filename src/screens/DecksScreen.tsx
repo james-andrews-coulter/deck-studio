@@ -10,7 +10,7 @@ export default function DecksScreen() {
   const setDeckDetail = useAppStore((s) => s.setDeckDetail);
   return (
     <div>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background px-3 py-2 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md md:px-5">
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background px-3 py-2 md:px-5">
         <NavHamburger />
         <h2 className="flex-1 truncate text-xl font-semibold">Decks</h2>
         <ImportDeckButton />

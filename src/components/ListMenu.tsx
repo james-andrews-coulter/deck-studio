@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MoreVertical } from 'lucide-react';
+import { BookOpen, Copy, MoreVertical } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import {
@@ -13,16 +13,25 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { useAppStore } from '@/store';
 import { exportListFile } from '@/lib/exportListFile';
 
-type Props = { listId: string };
+type Props = {
+  listId: string;
+  onBuildFromKept?: () => void;
+};
 
-export function ListMenu({ listId }: Props) {
+export function ListMenu({ listId, onBuildFromKept }: Props) {
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
   const clearAllGroups = useAppStore((s) => s.clearAllGroups);
   const deleteList = useAppStore((s) => s.deleteList);
+  const setExerciseSheetOpen = useAppStore((s) => s.setExerciseSheetOpen);
   const navigate = useNavigate();
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   if (!list) return null;
+
+  const exercise = list.exerciseId
+    ? deck?.exercises?.find((e) => e.id === list.exerciseId)
+    : undefined;
+  const keptCount = list.cardRefs.filter((r) => r.processed === 'keep').length;
 
   const onExport = () => {
     if (!deck) return;
@@ -38,12 +47,35 @@ export function ListMenu({ listId }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {exercise && (
+            <>
+              <DropdownMenuItem onClick={() => setExerciseSheetOpen(listId, true)}>
+                <BookOpen className="mr-2 h-4 w-4" aria-hidden />
+                View guide
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          {onBuildFromKept && (
+            <DropdownMenuItem
+              onClick={onBuildFromKept}
+              disabled={keptCount === 0}
+            >
+              <Copy className="mr-2 h-4 w-4" aria-hidden />
+              Build new list from kept
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={onExport} disabled={!deck}>
             Export as markdown
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => clearAllGroups(listId)}>Clear all groups</DropdownMenuItem>
-          <DropdownMenuItem className="text-red-600" onClick={() => setConfirmDeleteOpen(true)}>
+          <DropdownMenuItem onClick={() => clearAllGroups(listId)}>
+            Clear all folders
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="text-red-600"
+            onClick={() => setConfirmDeleteOpen(true)}
+          >
             Delete list
           </DropdownMenuItem>
         </DropdownMenuContent>

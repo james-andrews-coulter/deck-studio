@@ -18,8 +18,9 @@ const DropdownMenuContent = React.forwardRef<
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
+      collisionPadding={8}
       className={cn(
-        'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-background p-1 text-foreground shadow-md',
+        'z-[60] min-w-[8rem] overflow-hidden rounded-md border bg-background p-1 text-foreground shadow-lg',
         className
       )}
       {...props}

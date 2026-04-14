@@ -5,6 +5,12 @@ import { uuid } from '@/lib/uuid';
 export type ListsSlice = {
   lists: Record<string, List>;
   createList: (deckId: string, name: string, exerciseId?: string) => string;
+  createListFromCards: (
+    deckId: string,
+    name: string,
+    cardIds: string[],
+    exerciseId?: string,
+  ) => string;
   renameList: (listId: string, name: string) => void;
   duplicateList: (listId: string) => string;
   deleteList: (listId: string) => void;
@@ -12,6 +18,12 @@ export type ListsSlice = {
   reorderCards: (listId: string, fromIndex: number, toIndex: number) => void;
   setHidden: (listId: string, cardId: string, hidden: boolean) => void;
   restoreAllHidden: (listId: string) => void;
+  setProcessed: (
+    listId: string,
+    cardId: string,
+    processed: 'keep' | 'discard' | undefined,
+  ) => void;
+  clearProcessedForScope: (listId: string, groupId: string | null) => void;
 
   addGroup: (listId: string, name: string) => string;
   renameGroup: (listId: string, groupId: string, name: string) => void;
@@ -69,6 +81,38 @@ export const createListsSlice: StateCreator<
       updatedAt: now,
       groups: seededGroups,
       cardRefs: deck.cards.map((c) => ({ cardId: c.id, hidden: false, groupId: null })),
+      ...(boundExerciseId ? { exerciseId: boundExerciseId } : {}),
+    };
+    set((s) => ({ lists: { ...s.lists, [id]: list } }));
+    return id;
+  },
+
+  createListFromCards: (deckId, name, cardIds, exerciseId) => {
+    const deck = get().decks[deckId];
+    if (!deck) throw new Error(`Deck ${deckId} not found`);
+    const id = uuid();
+    const now = new Date().toISOString();
+    let seededGroups: Group[] = [];
+    let boundExerciseId: string | undefined;
+    if (exerciseId) {
+      const ex = deck.exercises?.find((e) => e.id === exerciseId);
+      if (!ex) throw new Error(`Exercise ${exerciseId} not found on deck ${deckId}`);
+      seededGroups = ex.groups.map((label) => ({ id: uuid(), name: label }));
+      boundExerciseId = ex.id;
+    }
+    const idSet = new Set(cardIds);
+    const list: List = {
+      id,
+      name,
+      deckId,
+      createdAt: now,
+      updatedAt: now,
+      groups: seededGroups,
+      // Preserve source order, skip duplicates, filter to requested IDs.
+      // Fresh cardRefs: unhidden, ungrouped, unprocessed.
+      cardRefs: deck.cards
+        .filter((c) => idSet.has(c.id))
+        .map((c) => ({ cardId: c.id, hidden: false, groupId: null })),
       ...(boundExerciseId ? { exerciseId: boundExerciseId } : {}),
     };
     set((s) => ({ lists: { ...s.lists, [id]: list } }));
@@ -164,7 +208,12 @@ export const createListsSlice: StateCreator<
   moveCardToGroup: (listId, cardId, groupId) =>
     set(withList(listId, (l) => ({
       ...l,
-      cardRefs: l.cardRefs.map((r) => (r.cardId === cardId ? { ...r, groupId } : r)),
+      cardRefs: l.cardRefs.map((r) =>
+        r.cardId === cardId && r.groupId !== groupId
+          ? // Context change resets the swipe disposition.
+            { ...r, groupId, processed: undefined }
+          : r,
+      ),
     }))),
 
   moveCardToGroupAt: (listId, cardId, targetGroupId, insertIndexInGroup) =>
@@ -172,7 +221,12 @@ export const createListsSlice: StateCreator<
       const without = l.cardRefs.filter((r) => r.cardId !== cardId);
       const original = l.cardRefs.find((r) => r.cardId === cardId);
       if (!original) return l;
-      const updated: CardRef = { ...original, groupId: targetGroupId };
+      const changedGroup = original.groupId !== targetGroupId;
+      const updated: CardRef = {
+        ...original,
+        groupId: targetGroupId,
+        processed: changedGroup ? undefined : original.processed,
+      };
       const groupRefs = without
         .map((r, i) => ({ r, i }))
         .filter(({ r }) => r.groupId === targetGroupId);
@@ -184,6 +238,22 @@ export const createListsSlice: StateCreator<
       next.splice(targetGlobalIndex, 0, updated);
       return { ...l, cardRefs: next };
     })),
+
+  setProcessed: (listId, cardId, processed) =>
+    set(withList(listId, (l) => ({
+      ...l,
+      cardRefs: l.cardRefs.map((r) =>
+        r.cardId === cardId ? { ...r, processed } : r,
+      ),
+    }))),
+
+  clearProcessedForScope: (listId, groupId) =>
+    set(withList(listId, (l) => ({
+      ...l,
+      cardRefs: l.cardRefs.map((r) =>
+        r.groupId === groupId ? { ...r, processed: undefined } : r,
+      ),
+    }))),
 
   setCardRefs: (listId, cardRefs) =>
     set(withList(listId, (l) => ({ ...l, cardRefs }))),

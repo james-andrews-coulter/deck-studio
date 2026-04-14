@@ -1,65 +1,781 @@
 {
-  "name": "Creative Prompts",
+  "name": "The School of Life: What Do You Really Want?",
   "fieldMapping": {
     "title": "prompt",
     "subtitle": "category",
-    "body": "elaboration",
-    "meta": ["difficulty", "tags"]
+    "meta": [
+      "category"
+    ]
   },
   "cards": [
     {
       "id": "1",
-      "prompt": "Use an old idea",
-      "category": "Oblique Strategy",
-      "elaboration": "Look back at something you dismissed. What feels true about it now?",
-      "difficulty": "easy",
-      "tags": ["reflective", "warmup"]
+      "prompt": "Becoming more emotionally mature",
+      "category": "SELF"
     },
     {
       "id": "2",
-      "prompt": "Honor thy error as a hidden intention",
-      "category": "Oblique Strategy",
-      "elaboration": "What might the mistake be revealing?",
-      "difficulty": "medium",
-      "tags": ["reframe"]
+      "prompt": "More fun",
+      "category": "FAMILY"
     },
     {
       "id": "3",
-      "prompt": "Ask your body",
-      "category": "Somatic",
-      "elaboration": "Where do you feel stuck? Breathe into that.",
-      "difficulty": "easy",
-      "tags": ["pause"]
+      "prompt": "More spirituality",
+      "category": "MEANING"
     },
     {
       "id": "4",
-      "prompt": "Repetition is a form of change",
-      "category": "Oblique Strategy",
-      "elaboration": "Return to the same spot with fresh eyes.",
-      "difficulty": "hard",
-      "tags": ["discipline", "craft"]
+      "prompt": "Less people pleasing",
+      "category": "FRIENDSHIP/SOCIABILITY"
     },
     {
       "id": "5",
-      "prompt": "Take a break",
-      "category": "Permission",
-      "elaboration": "Really. Go.",
-      "difficulty": "easy",
-      "tags": ["rest"]
+      "prompt": "More adventurous weekends",
+      "category": "LEISURE"
+    },
+    {
+      "id": "6",
+      "prompt": "Accepting ageing and mortality",
+      "category": "MEANING"
+    },
+    {
+      "id": "7",
+      "prompt": "Resisting cynicism",
+      "category": "SELF"
+    },
+    {
+      "id": "8",
+      "prompt": "More adventures",
+      "category": "FAMILY"
+    },
+    {
+      "id": "9",
+      "prompt": "Deciding whether to stay in or leave a relationship",
+      "category": "LOVE"
+    },
+    {
+      "id": "10",
+      "prompt": "Being quicker to apologise",
+      "category": "LOVE"
+    },
+    {
+      "id": "11",
+      "prompt": "New places",
+      "category": "LEISURE"
+    },
+    {
+      "id": "12",
+      "prompt": "Finding a partner",
+      "category": "LOVE"
+    },
+    {
+      "id": "13",
+      "prompt": "Cooking more",
+      "category": "LEISURE"
+    },
+    {
+      "id": "14",
+      "prompt": "More time alone",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "15",
+      "prompt": "More politics",
+      "category": "SELF"
+    },
+    {
+      "id": "16",
+      "prompt": "More time for self-analysis",
+      "category": "SELF"
+    },
+    {
+      "id": "17",
+      "prompt": "Forgiving a family member",
+      "category": "FAMILY"
+    },
+    {
+      "id": "18",
+      "prompt": "Being happier with what I have",
+      "category": "MEANING"
+    },
+    {
+      "id": "19",
+      "prompt": "Settling down",
+      "category": "LOVE"
+    },
+    {
+      "id": "20",
+      "prompt": "Discovering my true talents",
+      "category": "MEANING"
+    },
+    {
+      "id": "21",
+      "prompt": "More exercise",
+      "category": "LEISURE"
+    },
+    {
+      "id": "22",
+      "prompt": "Finding fulfilling work",
+      "category": "WORK"
+    },
+    {
+      "id": "23",
+      "prompt": "More treats",
+      "category": "MONEY"
+    },
+    {
+      "id": "24",
+      "prompt": "Doing charitable work",
+      "category": "MEANING"
+    },
+    {
+      "id": "25",
+      "prompt": "Less impostor syndrome",
+      "category": "WORK"
+    },
+    {
+      "id": "26",
+      "prompt": "Explaining myself better to others",
+      "category": "SELF"
+    },
+    {
+      "id": "27",
+      "prompt": "Being more vulnerable with others",
+      "category": "SELF"
+    },
+    {
+      "id": "28",
+      "prompt": "Reading more",
+      "category": "LEISURE"
+    },
+    {
+      "id": "29",
+      "prompt": "More walks at dusk",
+      "category": "LEISURE"
+    },
+    {
+      "id": "30",
+      "prompt": "Overcoming past traumas",
+      "category": "SELF"
+    },
+    {
+      "id": "31",
+      "prompt": "Greater curiosity",
+      "category": "SELF"
+    },
+    {
+      "id": "32",
+      "prompt": "Getting therapy",
+      "category": "SELF"
+    },
+    {
+      "id": "33",
+      "prompt": "Less manic ambition",
+      "category": "WORK"
+    },
+    {
+      "id": "34",
+      "prompt": "Being less jealous of friends",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "35",
+      "prompt": "Reconnecting with old friends",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "36",
+      "prompt": "Better diet",
+      "category": "BODY"
+    },
+    {
+      "id": "37",
+      "prompt": "Reconnecting with my parents",
+      "category": "FAMILY"
+    },
+    {
+      "id": "38",
+      "prompt": "Starting a family",
+      "category": "FAMILY"
+    },
+    {
+      "id": "39",
+      "prompt": "Being more friendly around colleagues",
+      "category": "WORK"
+    },
+    {
+      "id": "40",
+      "prompt": "Greater recognition",
+      "category": "WORK"
+    },
+    {
+      "id": "41",
+      "prompt": "Talking to more strangers",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "42",
+      "prompt": "Less individual screen time",
+      "category": "FAMILY"
+    },
+    {
+      "id": "43",
+      "prompt": "Earlier bedtime",
+      "category": "LEISURE"
+    },
+    {
+      "id": "44",
+      "prompt": "Being more assertive around colleagues",
+      "category": "WORK"
+    },
+    {
+      "id": "45",
+      "prompt": "Less sulking",
+      "category": "MOOD"
+    },
+    {
+      "id": "46",
+      "prompt": "Saving for a house",
+      "category": "MONEY"
+    },
+    {
+      "id": "47",
+      "prompt": "More wonder",
+      "category": "MOOD"
+    },
+    {
+      "id": "48",
+      "prompt": "Marriage",
+      "category": "LOVE"
+    },
+    {
+      "id": "49",
+      "prompt": "Be more present/ 'in the moment'",
+      "category": "MOOD"
+    },
+    {
+      "id": "50",
+      "prompt": "More lemons, olives and figs",
+      "category": "LEISURE"
+    },
+    {
+      "id": "51",
+      "prompt": "Accepting my own limitations",
+      "category": "SELF"
+    },
+    {
+      "id": "52",
+      "prompt": "More culture",
+      "category": "LEISURE"
+    },
+    {
+      "id": "53",
+      "prompt": "More creative",
+      "category": "LEISURE"
+    },
+    {
+      "id": "54",
+      "prompt": "Greater self-confidence",
+      "category": "SELF"
+    },
+    {
+      "id": "55",
+      "prompt": "More small pleasures",
+      "category": "SELF"
+    },
+    {
+      "id": "56",
+      "prompt": "Enjoying the small pleasures of life",
+      "category": "MEANING"
+    },
+    {
+      "id": "57",
+      "prompt": "More daydreaming",
+      "category": "SELF"
+    },
+    {
+      "id": "58",
+      "prompt": "Accepting my flawed nature",
+      "category": "SELF"
+    },
+    {
+      "id": "59",
+      "prompt": "Liking myself more",
+      "category": "SELF"
+    },
+    {
+      "id": "60",
+      "prompt": "A quiet life",
+      "category": "WORK"
+    },
+    {
+      "id": "61",
+      "prompt": "Less screen time",
+      "category": "LEISURE"
+    },
+    {
+      "id": "62",
+      "prompt": "More nature",
+      "category": "LEISURE"
+    },
+    {
+      "id": "63",
+      "prompt": "Worrying less about money",
+      "category": "MONEY"
+    },
+    {
+      "id": "64",
+      "prompt": "Greater spontaneity",
+      "category": "MEANING"
+    },
+    {
+      "id": "65",
+      "prompt": "More gratitude",
+      "category": "SELF"
+    },
+    {
+      "id": "66",
+      "prompt": "Fewer late nights",
+      "category": "WORK"
+    },
+    {
+      "id": "67",
+      "prompt": "Children",
+      "category": "LOVE"
+    },
+    {
+      "id": "68",
+      "prompt": "Healing a family feud",
+      "category": "FAMILY"
+    },
+    {
+      "id": "69",
+      "prompt": "Finding my life's purpose",
+      "category": "MEANING"
+    },
+    {
+      "id": "70",
+      "prompt": "Working out real interests",
+      "category": "WORK"
+    },
+    {
+      "id": "71",
+      "prompt": "Lose weight",
+      "category": "BODY"
+    },
+    {
+      "id": "72",
+      "prompt": "Quitting job",
+      "category": "WORK"
+    },
+    {
+      "id": "73",
+      "prompt": "Cutting a toxic family member out of my life",
+      "category": "FAMILY"
+    },
+    {
+      "id": "74",
+      "prompt": "Having kinkier sex",
+      "category": "LOVE"
+    },
+    {
+      "id": "75",
+      "prompt": "Reconnecting with siblings",
+      "category": "FAMILY"
+    },
+    {
+      "id": "76",
+      "prompt": "Greater engagement with culture",
+      "category": "SELF"
+    },
+    {
+      "id": "77",
+      "prompt": "Making peace with an enemy",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "78",
+      "prompt": "Being kinder",
+      "category": "MEANING"
+    },
+    {
+      "id": "79",
+      "prompt": "Forgiving myself",
+      "category": "SELF"
+    },
+    {
+      "id": "80",
+      "prompt": "Earning money from my passion",
+      "category": "MONEY"
+    },
+    {
+      "id": "81",
+      "prompt": "Less shame",
+      "category": "MOOD"
+    },
+    {
+      "id": "82",
+      "prompt": "More parties",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "83",
+      "prompt": "Greater ambition",
+      "category": "WORK"
+    },
+    {
+      "id": "84",
+      "prompt": "Cannier with investments",
+      "category": "MONEY"
+    },
+    {
+      "id": "85",
+      "prompt": "Paying off the mortgage",
+      "category": "MONEY"
+    },
+    {
+      "id": "86",
+      "prompt": "Less status anxiety",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "87",
+      "prompt": "Being there for friends in crisis",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "88",
+      "prompt": "Learning to be single and happy",
+      "category": "LOVE"
+    },
+    {
+      "id": "89",
+      "prompt": "Spending more time with the children",
+      "category": "FAMILY"
+    },
+    {
+      "id": "90",
+      "prompt": "Caring less about the opinions of people I dislike",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "91",
+      "prompt": "Less perfectionism",
+      "category": "WORK"
+    },
+    {
+      "id": "92",
+      "prompt": "Earning more money",
+      "category": "WORK"
+    },
+    {
+      "id": "93",
+      "prompt": "Less anxiety",
+      "category": "MOOD"
+    },
+    {
+      "id": "94",
+      "prompt": "Quit smoking",
+      "category": "BODY"
+    },
+    {
+      "id": "95",
+      "prompt": "Understanding myself better",
+      "category": "SELF"
+    },
+    {
+      "id": "96",
+      "prompt": "Improving management skills",
+      "category": "WORK"
+    },
+    {
+      "id": "97",
+      "prompt": "Finding calm",
+      "category": "MOOD"
+    },
+    {
+      "id": "98",
+      "prompt": "Starting my own business",
+      "category": "WORK"
+    },
+    {
+      "id": "99",
+      "prompt": "Fewer but deeper friends",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "100",
+      "prompt": "Meeting new people",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "101",
+      "prompt": "Leaving a relationship",
+      "category": "LOVE"
+    },
+    {
+      "id": "102",
+      "prompt": "Daring more/ Gaining confidence to ask for things",
+      "category": "WORK"
+    },
+    {
+      "id": "103",
+      "prompt": "Reconnecting with my partner",
+      "category": "LOVE"
+    },
+    {
+      "id": "104",
+      "prompt": "Saying no to more events",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "105",
+      "prompt": "Having deeper, more meaningful conversations",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "106",
+      "prompt": "Overcoming regrets",
+      "category": "MEANING"
+    },
+    {
+      "id": "107",
+      "prompt": "Wasting less money",
+      "category": "MONEY"
+    },
+    {
+      "id": "108",
+      "prompt": "Having fewer arguments",
+      "category": "LOVE"
+    },
+    {
+      "id": "109",
+      "prompt": "Accepting my children's choices and identities",
+      "category": "FAMILY"
+    },
+    {
+      "id": "110",
+      "prompt": "Less porn",
+      "category": "BODY"
+    },
+    {
+      "id": "111",
+      "prompt": "Quieter weekends",
+      "category": "LEISURE"
+    },
+    {
+      "id": "112",
+      "prompt": "Greater engagement with science",
+      "category": "SELF"
+    },
+    {
+      "id": "113",
+      "prompt": "Coping with jealousy and envy",
+      "category": "MOOD"
+    },
+    {
+      "id": "114",
+      "prompt": "Get rid of frenemies",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "115",
+      "prompt": "Avoiding self-sabotage",
+      "category": "SELF"
+    },
+    {
+      "id": "116",
+      "prompt": "Procrastinating less",
+      "category": "WORK"
+    },
+    {
+      "id": "117",
+      "prompt": "Better clothes",
+      "category": "BODY"
+    },
+    {
+      "id": "118",
+      "prompt": "Learning to say 'no'",
+      "category": "WORK"
+    },
+    {
+      "id": "119",
+      "prompt": "More patience",
+      "category": "MOOD"
+    },
+    {
+      "id": "120",
+      "prompt": "Prioritising a health condition",
+      "category": "BODY"
+    },
+    {
+      "id": "121",
+      "prompt": "Less travel",
+      "category": "WORK"
+    },
+    {
+      "id": "122",
+      "prompt": "Less despair",
+      "category": "MOOD"
+    },
+    {
+      "id": "123",
+      "prompt": "Being less irritable",
+      "category": "SELF"
+    },
+    {
+      "id": "124",
+      "prompt": "Learning to love my body",
+      "category": "BODY"
+    },
+    {
+      "id": "125",
+      "prompt": "Having emotionally closer sex",
+      "category": "LOVE"
+    },
+    {
+      "id": "126",
+      "prompt": "Having more casual/ meaningless sex",
+      "category": "LOVE"
+    },
+    {
+      "id": "127",
+      "prompt": "Having a tidier house",
+      "category": "FAMILY"
+    },
+    {
+      "id": "128",
+      "prompt": "Being more stoic",
+      "category": "MOOD"
+    },
+    {
+      "id": "129",
+      "prompt": "Learning about economics",
+      "category": "SELF"
+    },
+    {
+      "id": "130",
+      "prompt": "Establishing greater distance from parents",
+      "category": "FAMILY"
+    },
+    {
+      "id": "131",
+      "prompt": "Greater balance in chores",
+      "category": "FAMILY"
+    },
+    {
+      "id": "132",
+      "prompt": "Infidelity",
+      "category": "LOVE"
+    },
+    {
+      "id": "133",
+      "prompt": "Less hovering over the children",
+      "category": "FAMILY"
+    },
+    {
+      "id": "134",
+      "prompt": "Less sulking",
+      "category": "LOVE"
+    },
+    {
+      "id": "135",
+      "prompt": "Less drinking",
+      "category": "BODY"
+    },
+    {
+      "id": "136",
+      "prompt": "Living abroad",
+      "category": "WORK"
+    },
+    {
+      "id": "137",
+      "prompt": "More fidelity",
+      "category": "LOVE"
+    },
+    {
+      "id": "138",
+      "prompt": "Quit drinking",
+      "category": "BODY"
+    },
+    {
+      "id": "139",
+      "prompt": "Opening up to my friends",
+      "category": "FRIENDSHIP/SOCIABILITY"
+    },
+    {
+      "id": "140",
+      "prompt": "Less anger",
+      "category": "MOOD"
     }
   ],
   "exercises": [
     {
-      "id": "priority-planner",
-      "name": "Priority Planner",
-      "instructions": "Our goals and priorities are not uniform: they require differing amounts of effort, and different timeframes in which they can be achieved.\n\nOnce you've selected a number of goals and priorities you wish to work towards, arrange them according to the time you expect it will take you to achieve them.",
-      "groups": ["This Week", "This Month", "This Year", "Next Five Years", "Over a Lifetime"]
+      "id": "pyramid-of-psychological-needs",
+      "name": "Pyramid of Psychological Needs",
+      "instructions": "Arrange your cards into a three-tiered pyramid representing your psychological needs, inspired by Maslow's hierarchy.\n\n1. **Love and Belonging** (bottom row): Choose three or four cards from the LOVE, FAMILY or FRIENDSHIP/SOCIABILITY categories \u2014 those that relate to your intimate relationships, friendships, family, colleagues or romantic partners.\n\n2. **Esteem** (middle row): Choose two to three cards from the WORK, MONEY, MOOD or BODY categories \u2014 those that relate to your need for esteem, gaining prestige, and feeling a sense of accomplishment.\n\n3. **Self-Actualisation** (top row): Choose one or two cards from the SELF, LEISURE and MEANING categories \u2014 those that support your need for self-actualisation, achieving your full potential and fulfilling your life's purpose.",
+      "groups": [
+        "Love and Belonging",
+        "Esteem",
+        "Self-Actualisation"
+      ]
     },
     {
-      "id": "keep-maybe-park",
-      "name": "Keep / Maybe / Park",
-      "instructions": "A fast triage. Move each card into one of three buckets based on your gut read.\n\n- **Keep:** you're confident it belongs.\n- **Maybe:** you're unsure — come back later.\n- **Park:** not now.",
-      "groups": ["Keep", "Maybe", "Park"]
+      "id": "priority-planner",
+      "name": "Priority Planner",
+      "instructions": "Our goals and priorities require differing amounts of effort and different timeframes to achieve. Some are short term; others can only be accomplished over a much longer period.\n\nOnce you've selected a number of goals and priorities you wish to work towards, sort them according to the time you expect it will take to achieve them. Use this planner as a guide to tackle your goals, and a reminder of the time it will take to achieve your most treasured ambitions.",
+      "groups": [
+        "This Week",
+        "This Month",
+        "This Year",
+        "Within Five Years",
+        "Over a Lifetime"
+      ]
+    },
+    {
+      "id": "tournament-of-priorities",
+      "name": "Tournament of Priorities",
+      "instructions": "It is often hard to decide where to focus when we can identify many areas we'd like to improve. This exercise helps you decide which of your goals matters most.\n\nStage a tournament of priorities. First, choose 8\u201310 possible goals and priorities from a particular category you feel you would like to work towards. Then sort them into pairs and pit them against each other, eliminating whichever one you feel you could live without achieving. Advance from the quarter-finals to the semi-finals and then on to the final itself.\n\nYou should arrive at a single champion goal: the one you are most invested in meeting. At the same time, you'll be left with a number of close runners-up to tackle once your champion has been achieved.",
+      "groups": [
+        "Quarter-Finals",
+        "Semi-Finals",
+        "Final",
+        "Champion"
+      ]
+    },
+    {
+      "id": "steps-to-fulfilment",
+      "name": "Steps to Fulfilment",
+      "instructions": "A common pitfall when setting goals is over-ambition. We set our sights on a lofty target and fall into despair when it appears beyond our capabilities. The solution is not to give up, but to refocus on smaller, more achievable goals that will help us take steps towards attaining the ultimate one.\n\nFirst, select an ultimate goal from a particular category \u2014 an ambitious target you would like to reach but are currently some way off from achieving. Next, search through the deck and select any other goal or priority that will help you move towards this ultimate goal \u2014 ones that will give you the necessary skills, means, opportunities and experiences to progress.\n\nArrange your chosen cards into a set of discrete, sequential steps \u2014 an achievable programme where you can feel pride and progress with every step you take.",
+      "groups": [
+        "Step 1",
+        "Step 2",
+        "Step 3",
+        "Step 4",
+        "Step 5",
+        "Ultimate Goal"
+      ]
+    },
+    {
+      "id": "feasibility-fulfilment-matrix",
+      "name": "The Feasibility-Fulfilment Matrix",
+      "instructions": "Our goals can be measured on two axes: feasibility and fulfilment. This exercise helps you plot your goals on both axes as a way of deciding which to prioritise.\n\nMake a selection of 10 or so cards, either from a single category or a sample from different categories you wish to focus on. Place each card into one of four quadrants:\n\n1. **Inessentials** \u2014 not very feasible and only somewhat fulfilling. Probably not worth your time and effort.\n2. **Nice to Haves** \u2014 highly feasible but only somewhat fulfilling. They shouldn't demand your full focus, but may still be worth attempting.\n3. **Distant Dreams** \u2014 not very feasible but highly fulfilling. Worth aiming for, but the scale of the challenge should be kept in mind.\n4. **Achievable Ambitions** \u2014 very feasible and highly fulfilling. These should be your highest priority: they offer the most guaranteed route to fulfilment.",
+      "groups": [
+        "Inessentials",
+        "Nice to Haves",
+        "Distant Dreams",
+        "Achievable Ambitions"
+      ]
+    },
+    {
+      "id": "wallet-nightstand-and-phone",
+      "name": "Wallet, Nightstand and Phone",
+      "instructions": "It's useful to remind ourselves of our higher goals and priorities by displaying them where we will notice them. Pick three cards from any category.\n\n1. **Wallet**: Keep one card in your wallet or purse \u2014 a goal you wish to always keep at the forefront of your mind (perhaps from the SELF, LOVE, FAMILY or MEANING categories). By carrying it with you everywhere, it becomes a physical reminder of what truly matters.\n\n2. **Nightstand**: Leave one card on your bedside table \u2014 a goal you wish to be reminded of at the beginning or end of each day, that can be worked on first thing in the morning or just before sleep (perhaps from the SELF, BODY or MOOD category).\n\n3. **Phone**: Take a photo of one priority and set it as your phone's backdrop. You'll be regularly nudged towards your true aspiration.",
+      "groups": [
+        "Wallet",
+        "Nightstand",
+        "Phone"
+      ]
     }
   ]
 }
