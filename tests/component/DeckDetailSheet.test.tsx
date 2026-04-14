@@ -141,11 +141,11 @@ describe('DeckDetailSheet — with exercises', () => {
       ],
     });
 
-  it('shows the exercise count chip', () => {
+  it('shows the exercises-available chip', () => {
     const id = seedDeckWithExercises();
     useAppStore.getState().setDeckDetail(id);
     renderWithRouter();
-    expect(screen.getByText(/2 exercises/i)).toBeInTheDocument();
+    expect(screen.getByText(/exercises available/i)).toBeInTheDocument();
   });
 
   it('auto-fills the list name when an exercise is picked', async () => {

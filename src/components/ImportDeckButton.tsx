@@ -39,7 +39,7 @@ export function ImportDeckButton() {
       const isFirstImport = !hasShownFirstImport();
       if (isFirstImport) markFirstImportShown();
       if (parsed.skippedMapping) {
-        toast.success(`Imported "${parsed.name}" (${parsed.cards.length} cards)`);
+        toast.success(`Imported "${parsed.name}"`);
         if (isFirstImport) {
           toast.message('Now create a list from your deck to start curating.', { duration: 6000 });
         }

@@ -13,9 +13,9 @@ describe('SelectionActionBar', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('shows the selected count', () => {
+  it('shows the selected label', () => {
     render(<SelectionActionBar count={3} onClear={noop} onNewGroup={noop} onMoveTo={noop} />);
-    expect(screen.getByText(/3 selected/i)).toBeInTheDocument();
+    expect(screen.getByText(/^selected$/i)).toBeInTheDocument();
   });
 
   it('hides the New group button when fewer than 2 selected', () => {

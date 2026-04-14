@@ -24,8 +24,8 @@ test('select mode: bulk-create a group from checked cards', async ({ page }) => 
   await page.getByRole('checkbox', { name: /select card 1/i }).check();
   await page.getByRole('checkbox', { name: /select card 2/i }).check();
 
-  // Floating action bar shows 2 selected and a "New group" button
-  await expect(page.getByText(/2 selected/i)).toBeVisible();
+  // Floating action bar shows a "New group" button
+  await expect(page.getByRole('button', { name: /^new group$/i })).toBeVisible();
   await page.getByRole('button', { name: /^new group$/i }).click();
 
   // Dialog prompts for the group name

@@ -66,14 +66,12 @@ export function SwipeSession({ listId, onDone }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div className="flex w-full max-w-md flex-1 items-center justify-center [min-height:0] [max-height:calc(100svh-16rem)]">
-        <SwipeCard
-          key={`${cardId}-${index}`}
-          card={card}
-          mapping={deck.fieldMapping}
-          onCommit={commit}
-        />
-      </div>
+      <SwipeCard
+        key={`${cardId}-${index}`}
+        card={card}
+        mapping={deck.fieldMapping}
+        onCommit={commit}
+      />
       <div className="flex shrink-0 flex-wrap justify-center gap-2">
         <Button variant="outline" onClick={() => commit('discard')}>
           Discard

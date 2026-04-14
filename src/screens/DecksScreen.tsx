@@ -35,7 +35,6 @@ export default function DecksScreen() {
               >
                 <span className="font-medium">{d.name}</span>
                 <span className="text-xs text-muted-foreground">
-                  {d.cards.length} {d.cards.length === 1 ? 'card' : 'cards'} ·{' '}
                   {new Date(d.importedAt).toLocaleDateString()}
                 </span>
               </button>

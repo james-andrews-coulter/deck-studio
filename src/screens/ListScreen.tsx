@@ -220,7 +220,7 @@ export default function ListScreen() {
         hasResolvedExercise && mode === 'view' && 'pb-24 md:pr-16',
       )}
     >
-      <header className="sticky top-0 z-20 -mx-3 border-b bg-background/90 px-3 backdrop-blur-sm supports-[backdrop-filter]:bg-background/70 md:-mx-5 md:px-5">
+      <header className="sticky top-0 z-20 -mx-3 border-b bg-background px-3 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md md:-mx-5 md:px-5">
         <div className="flex items-center gap-2 py-2">
           <div className="min-w-0 flex-1">
             <InlineRenameHeading

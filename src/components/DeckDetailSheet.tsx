@@ -91,8 +91,7 @@ export function DeckDetailSheet() {
             </SheetDescription>
             {deck && deck.exercises && deck.exercises.length > 0 && (
               <span className="mt-1 inline-block w-fit rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                {deck.exercises.length}{' '}
-                {deck.exercises.length === 1 ? 'exercise' : 'exercises'}
+                Exercises available
               </span>
             )}
           </SheetHeader>
