@@ -259,6 +259,11 @@ export default function ListScreen() {
 
   return (
     <div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+      >
       <div className="sticky top-0 z-20 border-b bg-background supports-[backdrop-filter]:bg-background/90 supports-[backdrop-filter]:backdrop-blur-md">
         <header className="flex items-center gap-2 px-3 py-2 md:px-5">
           <NavHamburger />
@@ -271,11 +276,6 @@ export default function ListScreen() {
           <ListMenu listId={list.id} />
         </header>
         {mode === 'view' && (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={onDragEnd}
-          >
             <div className="flex max-h-[40svh] flex-col gap-1.5 overflow-y-auto border-t px-3 py-2 md:px-5">
               <SortableContext
                 items={list.groups.map((g) => `${GROUP_HEADER_PREFIX}${g.id}`)}
@@ -314,7 +314,6 @@ export default function ListScreen() {
                 />
               )}
             </div>
-          </DndContext>
         )}
       </div>
 
@@ -334,11 +333,6 @@ export default function ListScreen() {
         </div>
       ) : (
         <div className="flex flex-col gap-3 p-3 pb-20 md:p-5 md:pb-20">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={onDragEnd}
-          >
             {/* Cards panel */}
             <section className="rounded-xl border bg-card">
               <div className="flex items-center gap-2 border-b px-3 py-2">
@@ -390,7 +384,6 @@ export default function ListScreen() {
                 </GroupDropZone>
               </div>
             </section>
-          </DndContext>
 
           <ExerciseSheet listId={list.id} />
           <HiddenCardsSheet listId={list.id} />
@@ -444,6 +437,7 @@ export default function ListScreen() {
           )}
         </div>
       )}
+      </DndContext>
 
       <nav
         aria-label="View mode"
