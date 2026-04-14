@@ -33,15 +33,14 @@ test('exercise picker seeds groups and companion opens', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Keep', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Park', exact: true })).toBeVisible();
 
-  const peek = page.getByRole('button', { name: /triage.*view guide/i });
-  await expect(peek).toBeVisible();
-
-  await peek.click();
+  // The exercise guide opens from the nav drawer on a list with a bound exercise.
+  await page.getByRole('button', { name: /open navigation/i }).click();
+  await page.getByRole('button', { name: /triage.*view guide/i }).click();
   await expect(page.getByRole('heading', { name: 'Triage' })).toBeVisible();
   await expect(page.getByText(/keep or park each card/i)).toBeVisible();
 });
 
-test('None option gives a list with no peek strip', async ({ page }) => {
+test('None option gives a list with no exercise link in the drawer', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /import deck/i }).click();
   await page.setInputFiles(
@@ -58,5 +57,6 @@ test('None option gives a list with no peek strip', async ({ page }) => {
   await page.getByRole('button', { name: /^create$/i }).click();
 
   await expect(page).toHaveURL(/\/lists\/[^/]+$/);
+  await page.getByRole('button', { name: /open navigation/i }).click();
   await expect(page.getByRole('button', { name: /view guide/i })).toHaveCount(0);
 });

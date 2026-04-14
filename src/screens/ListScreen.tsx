@@ -18,7 +18,6 @@ import {
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
-import { ExercisePeekStrip } from '@/components/ExercisePeekStrip';
 import { ExerciseSheet } from '@/components/ExerciseSheet';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
@@ -117,9 +116,6 @@ export default function ListScreen() {
   }
 
   const hiddenCount = list.cardRefs.filter((r) => r.hidden).length;
-  const hasResolvedExercise = !!(
-    list.exerciseId && deck.exercises?.some((e) => e.id === list.exerciseId)
-  );
 
   const refsByGroup = (gid: string | null) =>
     list.cardRefs.filter((r) => r.groupId === gid && !r.hidden);
@@ -281,12 +277,7 @@ export default function ListScreen() {
           </div>
         )}
       </header>
-      <div
-        className={cn(
-          'p-3 pb-20 md:p-5 md:pb-20',
-          hasResolvedExercise && mode === 'view' && 'md:pr-16',
-        )}
-      >
+      <div className="p-3 pb-20 md:p-5 md:pb-20">
 
       {mode === 'swipe' ? (
         <SwipeSession listId={list.id} onDone={() => setMode('view')} />
@@ -362,7 +353,6 @@ export default function ListScreen() {
         )}
       </DndContext>
 
-      <ExercisePeekStrip listId={list.id} />
       <ExerciseSheet listId={list.id} />
       <HiddenCardsSheet listId={list.id} />
       <MoveToGroupDialog
