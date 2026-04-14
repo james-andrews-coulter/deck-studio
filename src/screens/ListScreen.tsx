@@ -21,7 +21,6 @@ import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
 import { ExerciseSheet } from '@/components/ExerciseSheet';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupTile } from '@/components/GroupTile';
-import { GroupDetailSheet } from '@/components/GroupDetailSheet';
 import { SortableCard } from '@/components/SortableCard';
 import { ListMenu } from '@/components/ListMenu';
 import { SwipeSession } from '@/components/SwipeSession';
@@ -32,7 +31,9 @@ import { SelectionActionBar } from '@/components/SelectionActionBar';
 import { GroupNameInput } from '@/components/GroupNameInput';
 import { GroupDropZone } from '@/components/GroupDropZone';
 import { MetaFilterBar } from '@/components/MetaFilterBar';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { cardMatchesFilters, getMetaFilterOptions } from '@/lib/metaFilters';
+import { shuffle } from '@/lib/shuffle';
 import { useListSelection } from '@/hooks/useListSelection';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,7 +43,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { EyeOff, FolderInput } from 'lucide-react';
+import { ArrowLeft, EyeOff, FolderInput, Shuffle, Trash2 } from 'lucide-react';
 import {
   GROUP_DROP_PREFIX,
   GROUP_HEADER_PREFIX,
@@ -54,6 +55,8 @@ export default function ListScreen() {
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
   const addGroup = useAppStore((s) => s.addGroup);
+  const renameGroup = useAppStore((s) => s.renameGroup);
+  const deleteGroup = useAppStore((s) => s.deleteGroup);
   const setCardRefs = useAppStore((s) => s.setCardRefs);
   const moveCardToGroupAt = useAppStore((s) => s.moveCardToGroupAt);
   const moveCardToGroup = useAppStore((s) => s.moveCardToGroup);
@@ -62,8 +65,8 @@ export default function ListScreen() {
 
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
   const [newGroupFromSelectionOpen, setNewGroupFromSelectionOpen] = useState(false);
-  const [openGroupId, setOpenGroupId] = useState<string | null>(null);
   const [metaFilters, setMetaFilters] = useState<Record<string, Set<string>>>({});
+  const [confirmDeleteFolder, setConfirmDeleteFolder] = useState(false);
   const {
     selectMode,
     selected,
@@ -72,6 +75,25 @@ export default function ListScreen() {
     selectAll,
     toggleSelectMode,
   } = useListSelection();
+
+  const [params, setParams] = useSearchParams();
+  const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
+  const folderScope = params.get('folder');
+  const setMode = (m: 'view' | 'swipe') =>
+    setParams((p) => {
+      p.set('mode', m);
+      return p;
+    });
+  const openFolder = (groupId: string) =>
+    setParams((p) => {
+      p.set('folder', groupId);
+      return p;
+    });
+  const closeFolder = () =>
+    setParams((p) => {
+      p.delete('folder');
+      return p;
+    });
 
   const metaOptions = useMemo(
     () => (deck ? getMetaFilterOptions(deck) : {}),
@@ -97,14 +119,6 @@ export default function ListScreen() {
     });
   };
 
-  const [params, setParams] = useSearchParams();
-  const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
-  const setMode = (m: 'view' | 'swipe') =>
-    setParams((p) => {
-      p.set('mode', m);
-      return p;
-    });
-
   const [groupDraft, setGroupDraft] = useState<string | null>(null);
   const commitNewGroup = () => {
     if (groupDraft && groupDraft.trim()) addGroup(list!.id, groupDraft.trim());
@@ -127,36 +141,39 @@ export default function ListScreen() {
         >
           The deck that this list was created from is missing. Re-import the deck or delete this list.
         </div>
-        <header className="flex items-center gap-2">
-          <InlineRenameHeading
-            value={list.name}
-            onChange={(n) => useAppStore.getState().renameList(list.id, n)}
-          />
-        </header>
-        <ul className="mt-4 space-y-2">
-          {list.cardRefs.map((r) => (
-            <li
-              key={r.cardId}
-              className="rounded border p-3 text-sm italic text-muted-foreground"
-            >
-              Missing card
-            </li>
-          ))}
-        </ul>
       </div>
     );
   }
 
+  // Resolve folder scope. If the URL points at a folder that no longer exists,
+  // drop the param silently.
+  const scopedGroup = folderScope
+    ? list.groups.find((g) => g.id === folderScope)
+    : undefined;
+  if (folderScope && !scopedGroup) {
+    closeFolder();
+  }
+  const inFolder = !!scopedGroup;
+
   const hiddenCount = list.cardRefs.filter((r) => r.hidden).length;
   const activeFilterCount = Object.values(metaFilters).reduce((n, s) => n + s.size, 0);
-  const ungroupedRows = list.cardRefs
-    .filter((r) => r.groupId === null && !r.hidden)
+
+  // Cards the current panel shows: either the selected folder's cards, or
+  // top-level ungrouped cards. Filters apply to either.
+  const panelRows = list.cardRefs
+    .filter((r) => {
+      if (r.hidden) return false;
+      if (inFolder) return r.groupId === scopedGroup!.id;
+      return r.groupId === null;
+    })
     .filter((r) => {
       if (activeFilterCount === 0) return true;
       const card = deck.cards.find((c) => c.id === r.cardId);
       if (!card) return true;
       return cardMatchesFilters(card, metaFilters);
     });
+
+  const panelDropZoneGroupId: string | null = inFolder ? scopedGroup!.id : null;
 
   const onDragEnd = (evt: DragEndEvent) => {
     const { active, over } = evt;
@@ -177,11 +194,9 @@ export default function ListScreen() {
       return;
     }
 
-    // Card drop
     const activeRef = list.cardRefs.find((r) => r.cardId === activeId);
     if (!activeRef) return;
 
-    // Dropped on a group tile — nest into that group
     if (overId.startsWith(GROUP_HEADER_PREFIX)) {
       const targetGroupId = overId.slice(GROUP_HEADER_PREFIX.length);
       if (activeRef.groupId === targetGroupId) return;
@@ -189,7 +204,6 @@ export default function ListScreen() {
       return;
     }
 
-    // Dropped on the ungrouped zone
     if (overId.startsWith(GROUP_DROP_PREFIX)) {
       const rawGroupId = overId.slice(GROUP_DROP_PREFIX.length);
       const targetGroupId = rawGroupId === UNGROUPED_DROP_ID ? null : rawGroupId;
@@ -198,7 +212,6 @@ export default function ListScreen() {
       return;
     }
 
-    // Dropped on another card in the same panel → reorder
     const overRef = list.cardRefs.find((r) => r.cardId === over.id);
     if (overRef && overRef.groupId === activeRef.groupId) {
       const from = list.cardRefs.findIndex((r) => r.cardId === active.id);
@@ -210,6 +223,35 @@ export default function ListScreen() {
         setCardRefs(list.id, next);
       }
     }
+  };
+
+  const onShufflePanel = () => {
+    if (panelRows.length < 2) return;
+    const shuffledIds = shuffle(panelRows.map((r) => r.cardId));
+    const refs = list.cardRefs.slice();
+    // Walk refs in order; every time we hit one that belongs to the current
+    // panel, replace it with the next entry from the shuffled id list.
+    let cursor = 0;
+    for (let i = 0; i < refs.length; i++) {
+      const r = refs[i];
+      const inScope = inFolder
+        ? r.groupId === scopedGroup!.id
+        : r.groupId === null;
+      if (!inScope || r.hidden) continue;
+      const card = deck.cards.find((c) => c.id === r.cardId);
+      if (activeFilterCount > 0 && card && !cardMatchesFilters(card, metaFilters))
+        continue;
+      const nextId = shuffledIds[cursor++];
+      if (!nextId) break;
+      const nextRef = refs.find((x) => x.cardId === nextId);
+      if (nextRef) refs[i] = nextRef;
+    }
+    setCardRefs(list.id, refs);
+  };
+
+  const onHideSelected = () => {
+    for (const cardId of selected) setHidden(list.id, cardId, true);
+    clearSelection();
   };
 
   const renderRow = (cardId: string) => {
@@ -263,6 +305,13 @@ export default function ListScreen() {
     );
   };
 
+  const panelTitle = inFolder ? null : 'Cards';
+  const emptyMessage = activeFilterCount > 0
+    ? 'No cards match the current filters.'
+    : inFolder
+      ? 'No cards in this folder yet.'
+      : 'No ungrouped cards.';
+
   return (
     <div>
       <DndContext
@@ -270,19 +319,54 @@ export default function ListScreen() {
         collisionDetection={closestCenter}
         onDragEnd={onDragEnd}
       >
-      <div className="sticky top-0 z-20 border-b bg-background supports-[backdrop-filter]:bg-background/90 supports-[backdrop-filter]:backdrop-blur-md">
-        <header className="flex items-center gap-2 px-3 py-2 md:px-5">
-          <NavHamburger />
-          <div className="min-w-0 flex-1">
-            <InlineRenameHeading
-              value={list.name}
-              onChange={(next) => useAppStore.getState().renameList(list.id, next)}
-            />
-          </div>
-          <ListMenu listId={list.id} />
-        </header>
-        {mode === 'view' && (
-            <div className="flex max-h-[40svh] flex-col gap-1.5 overflow-y-auto border-t px-3 py-2 md:px-5">
+        {/* Everything above the scrolling card list is one sticky block so
+            header + folder strip + panel chrome + filters all stay visible. */}
+        <div className="sticky top-0 z-20 border-b bg-background supports-[backdrop-filter]:bg-background/90 supports-[backdrop-filter]:backdrop-blur-md">
+          <header className="flex items-center gap-2 px-3 py-2 md:px-5">
+            {inFolder ? (
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label="Back to list"
+                onClick={closeFolder}
+              >
+                <ArrowLeft className="h-5 w-5" aria-hidden />
+              </Button>
+            ) : (
+              <NavHamburger />
+            )}
+            <div className="min-w-0 flex-1">
+              {inFolder ? (
+                <InlineRenameHeading
+                  value={scopedGroup!.name}
+                  onChange={(next) => renameGroup(list.id, scopedGroup!.id, next)}
+                />
+              ) : (
+                <InlineRenameHeading
+                  value={list.name}
+                  onChange={(next) => useAppStore.getState().renameList(list.id, next)}
+                />
+              )}
+            </div>
+            {inFolder ? (
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label="Delete folder"
+                onClick={() => setConfirmDeleteFolder(true)}
+              >
+                <Trash2 className="h-5 w-5 text-red-600" aria-hidden />
+              </Button>
+            ) : (
+              <ListMenu listId={list.id} />
+            )}
+          </header>
+
+          {mode === 'view' && !inFolder && (
+            <div
+              className="flex max-h-[9rem] flex-col gap-1.5 overflow-y-auto border-t px-3 py-2 md:px-5"
+              style={{ overscrollBehavior: 'contain' }}
+            >
               <SortableContext
                 items={list.groups.map((g) => `${GROUP_HEADER_PREFIX}${g.id}`)}
                 strategy={verticalListSortingStrategy}
@@ -292,7 +376,8 @@ export default function ListScreen() {
                     key={g.id}
                     listId={list.id}
                     group={g}
-                    onOpen={() => setOpenGroupId(g.id)}
+                    onOpen={() => openFolder(g.id)}
+                    onDelete={() => deleteGroup(list.id, g.id)}
                   />
                 ))}
               </SortableContext>
@@ -320,31 +405,17 @@ export default function ListScreen() {
                 />
               )}
             </div>
-        )}
-      </div>
+          )}
 
-      {mode === 'swipe' ? (
-        <div className="pb-20">
-          <MetaFilterBar
-            optionsByKey={metaOptions}
-            filters={metaFilters}
-            onToggle={toggleMetaFilter}
-            onClear={clearMetaFilter}
-          />
-          <SwipeSession
-            listId={list.id}
-            metaFilters={metaFilters}
-            onDone={() => setMode('view')}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3 p-3 pb-20 md:p-5 md:pb-20">
-            {/* Cards panel */}
-            <section className="rounded-xl border bg-card">
-              <div className="flex items-center gap-2 border-b px-3 py-2">
-                <h3 className="flex-1 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                  Cards
-                </h3>
+          {mode === 'view' && (
+            <>
+              <div className="flex items-center gap-2 border-t px-3 py-2 md:px-5">
+                {panelTitle && (
+                  <h3 className="flex-1 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    {panelTitle}
+                  </h3>
+                )}
+                {!panelTitle && <div className="flex-1" />}
                 <Button
                   size="sm"
                   variant={selectMode ? 'default' : 'outline'}
@@ -352,7 +423,16 @@ export default function ListScreen() {
                 >
                   {selectMode ? 'Done' : 'Select'}
                 </Button>
-                {hiddenCount > 0 && (
+                <Button
+                  size="icon"
+                  variant="outline"
+                  aria-label="Shuffle cards"
+                  onClick={onShufflePanel}
+                  disabled={panelRows.length < 2}
+                >
+                  <Shuffle className="h-4 w-4" aria-hidden />
+                </Button>
+                {!inFolder && hiddenCount > 0 && (
                   <Button
                     size="icon"
                     variant="outline"
@@ -369,85 +449,103 @@ export default function ListScreen() {
                 onToggle={toggleMetaFilter}
                 onClear={clearMetaFilter}
               />
-              <div className="p-3">
-                <GroupDropZone groupId={null}>
-                  <SortableContext
-                    items={ungroupedRows.map((r) => r.cardId)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {ungroupedRows.length === 0 ? (
-                      <p className="py-6 text-center text-xs text-muted-foreground">
-                        {activeFilterCount > 0
-                          ? 'No cards match the current filters.'
-                          : 'No ungrouped cards.'}
-                      </p>
-                    ) : (
-                      <ul className="space-y-1.5">
-                        {ungroupedRows.map((r) => renderRow(r.cardId))}
-                      </ul>
-                    )}
-                  </SortableContext>
-                </GroupDropZone>
-              </div>
-            </section>
-
-          <HiddenCardsSheet listId={list.id} />
-          <GroupDetailSheet
-            listId={list.id}
-            groupId={openGroupId}
-            onOpenChange={(o) => !o && setOpenGroupId(null)}
-          />
-          <MoveToGroupDialog
-            open={!!moveTarget}
-            onOpenChange={(o) => !o && setMoveTarget(null)}
-            groups={list.groups}
-            onPick={(groupId) => {
-              if (!moveTarget) return;
-              for (const cid of moveTarget.cardIds) {
-                moveCardToGroup(list.id, cid, groupId);
-              }
-              setMoveTarget(null);
-              clearSelection();
-            }}
-          />
-          {newGroupFromSelectionOpen && (
-            <Dialog
-              open
-              onOpenChange={(o) => !o && setNewGroupFromSelectionOpen(false)}
-            >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>New folder from {selected.size} cards</DialogTitle>
-                </DialogHeader>
-                <GroupNameInput
-                  onConfirm={(name) => {
-                    const id = addGroup(list.id, name);
-                    selected.forEach((cardId) => moveCardToGroup(list.id, cardId, id));
-                    setNewGroupFromSelectionOpen(false);
-                    toggleSelectMode();
-                  }}
-                  onCancel={() => setNewGroupFromSelectionOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-
-          {selectMode && (
-            <SelectionActionBar
-              count={selected.size}
-              onClear={clearSelection}
-              onSelectAll={() => selectAll(ungroupedRows.map((r) => r.cardId))}
-              onNewGroup={() => setNewGroupFromSelectionOpen(true)}
-              onMoveTo={() => setMoveTarget({ cardIds: Array.from(selected) })}
-            />
+            </>
           )}
         </div>
-      )}
+
+        {mode === 'swipe' ? (
+          <div className="pb-20">
+            <SwipeSession
+              listId={list.id}
+              metaFilters={metaFilters}
+              scopeGroupId={inFolder ? scopedGroup!.id : undefined}
+              onDone={() => setMode('view')}
+            />
+          </div>
+        ) : (
+          <div className="p-3 pb-24 md:p-5 md:pb-24">
+            <GroupDropZone groupId={panelDropZoneGroupId}>
+              <SortableContext
+                items={panelRows.map((r) => r.cardId)}
+                strategy={verticalListSortingStrategy}
+              >
+                {panelRows.length === 0 ? (
+                  <p className="py-8 text-center text-xs text-muted-foreground">
+                    {emptyMessage}
+                  </p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {panelRows.map((r) => renderRow(r.cardId))}
+                  </ul>
+                )}
+              </SortableContext>
+            </GroupDropZone>
+          </div>
+        )}
       </DndContext>
 
-      {/* Rendered regardless of mode so the drawer's "view guide" link works
-          from swipe mode too. */}
       <ExerciseSheet listId={list.id} />
+      <HiddenCardsSheet listId={list.id} />
+      <MoveToGroupDialog
+        open={!!moveTarget}
+        onOpenChange={(o) => !o && setMoveTarget(null)}
+        groups={list.groups}
+        onPick={(groupId) => {
+          if (!moveTarget) return;
+          for (const cid of moveTarget.cardIds) {
+            moveCardToGroup(list.id, cid, groupId);
+          }
+          setMoveTarget(null);
+          clearSelection();
+        }}
+      />
+      {newGroupFromSelectionOpen && (
+        <Dialog
+          open
+          onOpenChange={(o) => !o && setNewGroupFromSelectionOpen(false)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New folder from {selected.size} cards</DialogTitle>
+            </DialogHeader>
+            <GroupNameInput
+              onConfirm={(name) => {
+                const id = addGroup(list.id, name);
+                selected.forEach((cardId) => moveCardToGroup(list.id, cardId, id));
+                setNewGroupFromSelectionOpen(false);
+                toggleSelectMode();
+              }}
+              onCancel={() => setNewGroupFromSelectionOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+      <ConfirmDialog
+        open={confirmDeleteFolder}
+        onOpenChange={setConfirmDeleteFolder}
+        title={scopedGroup ? `Delete folder "${scopedGroup.name}"?` : 'Delete folder?'}
+        description="Cards in this folder will move to Ungrouped."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => {
+          if (scopedGroup) {
+            deleteGroup(list.id, scopedGroup.id);
+            closeFolder();
+          }
+          setConfirmDeleteFolder(false);
+        }}
+      />
+
+      {selectMode && (
+        <SelectionActionBar
+          count={selected.size}
+          onClear={clearSelection}
+          onSelectAll={() => selectAll(panelRows.map((r) => r.cardId))}
+          onHide={onHideSelected}
+          onNewGroup={() => setNewGroupFromSelectionOpen(true)}
+          onMoveTo={() => setMoveTarget({ cardIds: Array.from(selected) })}
+        />
+      )}
 
       <nav
         aria-label="View mode"

@@ -57,6 +57,11 @@ export function HiddenCardsSheet({ listId }: Props) {
             })}
           </ul>
         </div>
+        <div className="border-t p-3">
+          <Button className="w-full" onClick={() => setOpen(false)}>
+            Done
+          </Button>
+        </div>
       </SheetContent>
     </Sheet>
   );

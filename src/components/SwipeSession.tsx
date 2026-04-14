@@ -9,9 +9,11 @@ type Props = {
   listId: string;
   onDone: () => void;
   metaFilters?: Record<string, Set<string>>;
+  /** If set, the queue is scoped to this group instead of all ungrouped cards. */
+  scopeGroupId?: string;
 };
 
-export function SwipeSession({ listId, onDone, metaFilters = {} }: Props) {
+export function SwipeSession({ listId, onDone, metaFilters = {}, scopeGroupId }: Props) {
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
   const setHidden = useAppStore((s) => s.setHidden);
@@ -35,6 +37,7 @@ export function SwipeSession({ listId, onDone, metaFilters = {} }: Props) {
         list.cardRefs
           .filter((r) => {
             if (r.hidden) return false;
+            if (scopeGroupId !== undefined && r.groupId !== scopeGroupId) return false;
             const card = deck.cards.find((c) => c.id === r.cardId);
             if (!card) return false;
             return cardMatchesFilters(card, metaFilters);
@@ -42,10 +45,10 @@ export function SwipeSession({ listId, onDone, metaFilters = {} }: Props) {
           .map((r) => r.cardId),
       );
     },
-    // Freeze queue at session start (and when filters change). Intentionally do
-    // not depend on list.cardRefs so ordering edits elsewhere don't shuffle mid-session.
+    // Freeze queue at session start (and when filters or scope change).
+    // Intentionally do not depend on list.cardRefs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [listId, filterSignature],
+    [listId, filterSignature, scopeGroupId],
   );
   const [index, setIndex] = useState(0);
   const [undoStack, setUndoStack] = useState<

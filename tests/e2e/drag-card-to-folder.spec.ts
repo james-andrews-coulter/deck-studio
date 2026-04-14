@@ -24,7 +24,7 @@ test('dragging a card from the Cards panel onto a folder nests it', async ({ pag
   await page.getByRole('button', { name: /^select$/i }).click();
   await page.getByRole('checkbox', { name: /select card 1/i }).check();
   await page.getByRole('checkbox', { name: /select card 3/i }).check();
-  await page.getByRole('button', { name: /^new group$/i }).click();
+  await page.getByRole('button', { name: /^new folder$/i }).click();
   await page.getByRole('textbox', { name: /group name/i }).fill('Bin');
   await page.getByRole('button', { name: /create group/i }).click();
 

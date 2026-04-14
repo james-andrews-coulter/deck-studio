@@ -25,8 +25,8 @@ test('select mode: bulk-create a group from checked cards', async ({ page }) => 
   await page.getByRole('checkbox', { name: /select card 2/i }).check();
 
   // Floating action bar shows a "New group" button
-  await expect(page.getByRole('button', { name: /^new group$/i })).toBeVisible();
-  await page.getByRole('button', { name: /^new group$/i }).click();
+  await expect(page.getByRole('button', { name: /^new folder$/i })).toBeVisible();
+  await page.getByRole('button', { name: /^new folder$/i }).click();
 
   // Dialog prompts for the group name
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -39,7 +39,8 @@ test('select mode: bulk-create a group from checked cards', async ({ page }) => 
   const tile = page.getByRole('button', { name: 'Warm-ups', exact: true });
   await expect(tile).toBeVisible();
   await tile.click();
-  await expect(page.getByRole('heading', { name: /warm-ups/i })).toBeVisible();
+  // Opening a folder navigates to ?folder=... — URL reflects scope.
+  await expect(page).toHaveURL(/folder=/);
   await expect(page.getByText('Alpha')).toBeVisible();
   await expect(page.getByText('Beta')).toBeVisible();
 });

@@ -1,18 +1,22 @@
+import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Folder, GripVertical } from 'lucide-react';
+import { Folder, GripVertical, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { GROUP_HEADER_PREFIX } from '@/lib/groupDnd';
 import { cn } from '@/lib/utils';
+import { SwipeableRow } from './SwipeableRow';
+import { ConfirmDialog } from './ConfirmDialog';
 import type { Group } from '@/lib/types';
 
 type Props = {
   listId: string;
   group: Group;
   onOpen: () => void;
+  onDelete: () => void;
 };
 
-export function GroupTile({ listId, group, onOpen }: Props) {
+export function GroupTile({ listId, group, onOpen, onDelete }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } =
     useSortable({ id: `${GROUP_HEADER_PREFIX}${group.id}` });
   const hasCards = useAppStore(
@@ -20,6 +24,7 @@ export function GroupTile({ listId, group, onOpen }: Props) {
       (s.lists[listId]?.cardRefs.filter((r) => r.groupId === group.id && !r.hidden).length ??
         0) > 0,
   );
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -28,42 +33,66 @@ export function GroupTile({ listId, group, onOpen }: Props) {
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        'relative flex w-full items-center gap-2 rounded-lg border bg-card px-2 py-1.5 transition-colors',
-        isOver ? 'border-primary bg-primary/5' : 'border-border',
-      )}
-    >
-      <button
-        type="button"
-        onClick={onOpen}
-        className="flex flex-1 items-center gap-2 truncate text-left"
+    <div ref={setNodeRef} style={style}>
+      <SwipeableRow
+        className="rounded-lg"
+        actions={[
+          {
+            label: 'Delete',
+            icon: Trash2,
+            onClick: () => setConfirmOpen(true),
+            className: 'bg-red-600',
+          },
+        ]}
       >
-        <div className="relative shrink-0">
-          <Folder className="h-4 w-4 text-muted-foreground" aria-hidden />
-          {hasCards && (
-            <span
-              aria-hidden
-              className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-primary"
-            />
+        <div
+          className={cn(
+            'relative flex w-full items-center gap-2 rounded-lg border bg-card px-2 py-1.5 transition-colors',
+            isOver ? 'border-primary bg-primary/5' : 'border-border',
           )}
+        >
+          <button
+            type="button"
+            onClick={onOpen}
+            className="flex flex-1 items-center gap-2 truncate text-left"
+          >
+            <div className="relative shrink-0">
+              <Folder className="h-4 w-4 text-muted-foreground" aria-hidden />
+              {hasCards && (
+                <span
+                  aria-hidden
+                  className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-primary"
+                />
+              )}
+            </div>
+            <span className="truncate text-xs font-semibold uppercase tracking-[0.1em]">
+              {group.name}
+            </span>
+          </button>
+          <div
+            {...attributes}
+            {...listeners}
+            role="button"
+            tabIndex={0}
+            aria-label={`Drag to reorder ${group.name}`}
+            className="flex h-7 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+          >
+            <GripVertical className="h-4 w-4" aria-hidden />
+          </div>
         </div>
-        <span className="truncate text-xs font-semibold uppercase tracking-[0.1em]">
-          {group.name}
-        </span>
-      </button>
-      <div
-        {...attributes}
-        {...listeners}
-        role="button"
-        tabIndex={0}
-        aria-label={`Drag to reorder ${group.name}`}
-        className="flex h-7 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
-      >
-        <GripVertical className="h-4 w-4" aria-hidden />
-      </div>
+      </SwipeableRow>
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`Delete folder "${group.name}"?`}
+        description="Cards in this folder will move to Ungrouped."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => {
+          onDelete();
+          setConfirmOpen(false);
+        }}
+      />
     </div>
   );
 }
