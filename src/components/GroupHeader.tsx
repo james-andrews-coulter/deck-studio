@@ -1,23 +1,9 @@
 import { useState, type HTMLAttributes } from 'react';
-import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react';
-import { Button } from './ui/button';
-import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator,
-} from './ui/dropdown-menu';
+import { ChevronDown, ChevronRight, GripVertical, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from './ConfirmDialog';
-import { cn } from '@/lib/utils';
+import { SwipeableRow } from './SwipeableRow';
 import { useAppStore } from '@/store';
-import type { Group, GroupColor } from '@/lib/types';
-
-const colorSwatch: Record<GroupColor, string> = {
-  slate: 'bg-slate-400',
-  rose: 'bg-rose-500',
-  amber: 'bg-amber-500',
-  emerald: 'bg-emerald-500',
-  sky: 'bg-sky-500',
-  violet: 'bg-violet-500',
-};
+import type { Group } from '@/lib/types';
 
 type Props = {
   listId: string;
@@ -29,7 +15,6 @@ export function GroupHeader({ listId, group, dragHandleProps }: Props) {
   const collapsed = useAppStore((s) => !!s.ui.collapsedGroups[group.id]);
   const toggleCollapsed = useAppStore((s) => s.toggleGroupCollapsed);
   const renameGroup = useAppStore((s) => s.renameGroup);
-  const setGroupColor = useAppStore((s) => s.setGroupColor);
   const deleteGroup = useAppStore((s) => s.deleteGroup);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(group.name);
@@ -41,73 +26,70 @@ export function GroupHeader({ listId, group, dragHandleProps }: Props) {
   };
 
   return (
-    <div
-      {...dragHandleProps}
-      className={cn(
-        'flex items-center gap-2 border-b pb-1.5',
-        dragHandleProps && 'touch-none',
-      )}
-    >
-      <button
-        aria-label={collapsed ? 'Expand' : 'Collapse'}
-        onClick={() => toggleCollapsed(group.id)}
-        onPointerDown={(e) => e.stopPropagation()}
-        className="flex items-center"
-      >
-        {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </button>
-      <span className={cn('h-3 w-3 rounded-full', colorSwatch[group.color])} aria-hidden />
-      {editing ? (
-        <input
-          autoFocus
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onBlur={onRename}
-          onKeyDown={(e) => { if (e.key === 'Enter') onRename(); if (e.key === 'Escape') { setName(group.name); setEditing(false); }}}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="flex-1 rounded-md border bg-background p-1 text-base"
-        />
-      ) : (
-        <button
-          className="flex-1 text-left font-semibold"
-          onClick={() => setEditing(true)}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          {group.name}
-        </button>
-      )}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="icon"
-            variant="ghost"
-            aria-label="Group actions"
-            onPointerDown={(e) => e.stopPropagation()}
+    <>
+      <div className="flex items-stretch gap-1">
+        <div className="flex-1 min-w-0">
+          <SwipeableRow
+            className="rounded-none"
+            actions={[
+              {
+                label: 'Delete',
+                icon: Trash2,
+                onClick: () => setConfirmDeleteOpen(true),
+                className: 'bg-red-600',
+              },
+            ]}
           >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <div className="flex gap-1 p-1">
-            {(Object.keys(colorSwatch) as GroupColor[]).map((c) => (
+            <div className="flex items-center gap-2 border-b border-border/80 bg-background pb-1.5 pt-2">
               <button
-                key={c}
-                aria-label={`Color ${c}`}
-                className={cn('h-5 w-5 rounded-full', colorSwatch[c], group.color === c && 'ring-2 ring-foreground')}
-                onClick={() => setGroupColor(listId, group.id, c)}
-              />
-            ))}
-          </div>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setEditing(true)}>Rename</DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-red-600"
-            onClick={() => setConfirmDeleteOpen(true)}
+                aria-label={collapsed ? 'Expand' : 'Collapse'}
+                onClick={() => toggleCollapsed(group.id)}
+                className="flex items-center"
+              >
+                {collapsed ? (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+              </button>
+              {editing ? (
+                <input
+                  autoFocus
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={onRename}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') onRename();
+                    if (e.key === 'Escape') {
+                      setName(group.name);
+                      setEditing(false);
+                    }
+                  }}
+                  className="flex-1 rounded-md border bg-background px-2 py-1 text-sm font-bold uppercase tracking-[0.14em]"
+                />
+              ) : (
+                <button
+                  className="flex-1 truncate text-left text-sm font-bold uppercase tracking-[0.14em]"
+                  onClick={() => setEditing(true)}
+                >
+                  {group.name}
+                </button>
+              )}
+            </div>
+          </SwipeableRow>
+        </div>
+        {dragHandleProps && (
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Drag to reorder group"
+            {...dragHandleProps}
+            className="flex h-auto w-8 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted touch-none"
           >
-            Delete group
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <GripVertical className="h-4 w-4" />
+          </div>
+        )}
+      </div>
       <ConfirmDialog
         open={confirmDeleteOpen}
         onOpenChange={setConfirmDeleteOpen}
@@ -117,6 +99,6 @@ export function GroupHeader({ listId, group, dragHandleProps }: Props) {
         destructive
         onConfirm={() => deleteGroup(listId, group.id)}
       />
-    </div>
+    </>
   );
 }

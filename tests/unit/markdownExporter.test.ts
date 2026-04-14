@@ -20,7 +20,7 @@ const baseList: List = {
   deckId: 'd1',
   createdAt: '2026-04-12T10:00:00Z',
   updatedAt: '2026-04-12T10:00:00Z',
-  groups: [{ id: 'g1', name: 'Warm-ups', color: 'slate' }],
+  groups: [{ id: 'g1', name: 'Warm-ups' }],
   cardRefs: [
     { cardId: 'c1', hidden: false, groupId: 'g1' },
     { cardId: 'c2', hidden: false, groupId: null },

@@ -5,8 +5,8 @@ import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
 import type { Group } from '@/lib/types';
 
 const groups: Group[] = [
-  { id: 'g1', name: 'Warm-ups', color: 'slate' },
-  { id: 'g2', name: 'Deep work', color: 'emerald' },
+  { id: 'g1', name: 'Warm-ups' },
+  { id: 'g2', name: 'Deep work' },
 ];
 
 describe('MoveToGroupDialog', () => {

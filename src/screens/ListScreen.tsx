@@ -26,6 +26,7 @@ import { SortableCard } from '@/components/SortableCard';
 import { ListMenu } from '@/components/ListMenu';
 import { SwipeSession } from '@/components/SwipeSession';
 import { SwipeableRow } from '@/components/SwipeableRow';
+import { FolderInput } from 'lucide-react';
 import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
 import { SelectionActionBar } from '@/components/SelectionActionBar';
 import { GroupNameInput } from '@/components/GroupNameInput';
@@ -178,8 +179,20 @@ export default function ListScreen() {
     const card = deck.cards.find((c) => c.id === cardId);
     const body = (
       <SwipeableRow
-        onHide={() => setHidden(list.id, cardId, true)}
-        onRequestMove={() => setMoveTarget({ cardIds: [cardId] })}
+        actions={[
+          {
+            label: 'Hide',
+            icon: EyeOff,
+            onClick: () => setHidden(list.id, cardId, true),
+            className: 'bg-amber-500',
+          },
+          {
+            label: 'Move',
+            icon: FolderInput,
+            onClick: () => setMoveTarget({ cardIds: [cardId] }),
+            className: 'bg-sky-600',
+          },
+        ]}
       >
         {card ? (
           <CardView card={card} mapping={deck.fieldMapping} />
@@ -332,11 +345,13 @@ export default function ListScreen() {
         </SortableContext>
 
         {(list.groups.length > 0 || ungroupedRows.length > 0) && (
-          <section className="mt-4">
+          <section className="mt-6">
             {list.groups.length > 0 && (
-              <h3 className="mb-2 text-sm font-semibold uppercase text-muted-foreground">
-                (Ungrouped)
-              </h3>
+              <div className="mb-2 flex items-center gap-2 border-b border-border/80 pb-1.5 pt-2">
+                <span className="flex-1 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Ungrouped
+                </span>
+              </div>
             )}
             <GroupDropZone groupId={null}>
               <SortableContext
@@ -348,7 +363,7 @@ export default function ListScreen() {
                     Drop cards here
                   </div>
                 ) : (
-                  <ul className="space-y-1.5">
+                  <ul className="mt-2 space-y-1.5">
                     {ungroupedRows.map((r) => renderRow(r.cardId))}
                   </ul>
                 )}

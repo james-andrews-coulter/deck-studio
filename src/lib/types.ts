@@ -1,5 +1,3 @@
-export type GroupColor = 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'violet';
-
 export type FieldMapping = {
   title: string;
   subtitle?: string;
@@ -32,7 +30,6 @@ export type Deck = {
 export type Group = {
   id: string;
   name: string;
-  color: GroupColor;
 };
 
 export type CardRef = {

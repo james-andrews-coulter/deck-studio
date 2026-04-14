@@ -51,7 +51,6 @@ describe('createList', () => {
     expect(list.groups).toHaveLength(3);
     expect(list.groups.map((g) => g.name)).toEqual(['This Week', 'This Month', 'This Year']);
     for (const g of list.groups) {
-      expect(g.color).toBe('slate');
       expect(g.id).toBeTruthy();
     }
   });

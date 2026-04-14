@@ -53,14 +53,13 @@ describe('store', () => {
     expect(useAppStore.getState().lists[listId].cardRefs[0].hidden).toBe(true);
   });
 
-  it('adds, renames, recolors, and deletes groups', () => {
+  it('adds, renames, and deletes groups', () => {
     const deckId = useAppStore.getState().addDeck(sampleDeck);
     const listId = useAppStore.getState().createList(deckId, 'L');
     const gId = useAppStore.getState().addGroup(listId, 'Warmups');
     useAppStore.getState().renameGroup(listId, gId, 'Starters');
-    useAppStore.getState().setGroupColor(listId, gId, 'rose');
     let list = useAppStore.getState().lists[listId];
-    expect(list.groups[0]).toMatchObject({ name: 'Starters', color: 'rose' });
+    expect(list.groups[0]).toMatchObject({ name: 'Starters' });
     useAppStore.getState().moveCardToGroup(listId, 'c1', gId);
     expect(useAppStore.getState().lists[listId].cardRefs[0].groupId).toBe(gId);
     useAppStore.getState().deleteGroup(listId, gId);

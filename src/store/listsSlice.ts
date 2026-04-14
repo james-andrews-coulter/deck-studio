@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand';
-import type { CardRef, Group, GroupColor, List } from '@/lib/types';
+import type { CardRef, Group, List } from '@/lib/types';
 import { uuid } from '@/lib/uuid';
 import { shuffle } from '@/lib/shuffle';
 
@@ -16,7 +16,6 @@ export type ListsSlice = {
 
   addGroup: (listId: string, name: string) => string;
   renameGroup: (listId: string, groupId: string, name: string) => void;
-  setGroupColor: (listId: string, groupId: string, color: GroupColor) => void;
   deleteGroup: (listId: string, groupId: string) => void;
   reorderGroups: (listId: string, fromIndex: number, toIndex: number) => void;
   clearAllGroups: (listId: string) => void;
@@ -61,7 +60,7 @@ export const createListsSlice: StateCreator<
     if (exerciseId) {
       const ex = deck.exercises?.find((e) => e.id === exerciseId);
       if (!ex) throw new Error(`Exercise ${exerciseId} not found on deck ${deckId}`);
-      seededGroups = ex.groups.map((label) => ({ id: uuid(), name: label, color: 'slate' }));
+      seededGroups = ex.groups.map((label) => ({ id: uuid(), name: label }));
       boundExerciseId = ex.id;
     }
     const list: List = {
@@ -130,7 +129,7 @@ export const createListsSlice: StateCreator<
 
   addGroup: (listId, name) => {
     const id = uuid();
-    const group: Group = { id, name, color: 'slate' };
+    const group: Group = { id, name };
     set(withList(listId, (l) => ({ ...l, groups: [...l.groups, group] })));
     return id;
   },
@@ -139,12 +138,6 @@ export const createListsSlice: StateCreator<
     set(withList(listId, (l) => ({
       ...l,
       groups: l.groups.map((g) => (g.id === groupId ? { ...g, name } : g)),
-    }))),
-
-  setGroupColor: (listId, groupId, color) =>
-    set(withList(listId, (l) => ({
-      ...l,
-      groups: l.groups.map((g) => (g.id === groupId ? { ...g, color } : g)),
     }))),
 
   deleteGroup: (listId, groupId) =>
