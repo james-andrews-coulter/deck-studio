@@ -18,6 +18,8 @@ import {
 import { useAppStore } from '@/store';
 import { CardView } from '@/components/CardView';
 import { HiddenCardsSheet } from '@/components/HiddenCardsSheet';
+import { ExercisePeekStrip } from '@/components/ExercisePeekStrip';
+import { ExerciseSheet } from '@/components/ExerciseSheet';
 import { InlineRenameHeading } from '@/components/InlineRenameHeading';
 import { GroupHeader } from '@/components/GroupHeader';
 import { SortableCard } from '@/components/SortableCard';
@@ -38,6 +40,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { EyeOff } from 'lucide-react';
 import {
   GROUP_DROP_PREFIX,
   GROUP_HEADER_PREFIX,
@@ -112,6 +115,9 @@ export default function ListScreen() {
   }
 
   const hiddenCount = list.cardRefs.filter((r) => r.hidden).length;
+  const hasResolvedExercise = !!(
+    list.exerciseId && deck.exercises?.some((e) => e.id === list.exerciseId)
+  );
 
   const refsByGroup = (gid: string | null) =>
     list.cardRefs.filter((r) => r.groupId === gid && !r.hidden);
@@ -208,72 +214,76 @@ export default function ListScreen() {
   };
 
   return (
-    <div className="p-3 md:p-5">
-      <header className="flex items-center gap-2">
-        <InlineRenameHeading
-          value={list.name}
-          onChange={(next) => useAppStore.getState().renameList(list.id, next)}
-        />
-        {mode === 'view' && hiddenCount > 0 && (
-          <button
-            onClick={() => setHiddenSheetOpen(true)}
-            aria-label="Show hidden cards"
-            className="ml-auto rounded-full bg-muted px-3 py-1 text-xs"
-          >
-            {hiddenCount} hidden
-          </button>
-        )}
-        {mode === 'view' &&
-          (groupDraft === null ? (
+    <div
+      className={cn(
+        'p-3 md:p-5',
+        hasResolvedExercise && mode === 'view' && 'pb-24 md:pr-16',
+      )}
+    >
+      <header className="sticky top-0 z-20 -mx-3 border-b bg-background px-3 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md md:-mx-5 md:px-5">
+        <div className="flex items-center gap-2 py-2">
+          <div className="min-w-0 flex-1">
+            <InlineRenameHeading
+              value={list.name}
+              onChange={(next) => useAppStore.getState().renameList(list.id, next)}
+            />
+          </div>
+          <div className="inline-flex shrink-0 rounded-md border p-0.5 text-xs">
+            <button
+              className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
+              onClick={() => setMode('view')}
+            >
+              List
+            </button>
+            <button
+              className={cn('px-2 py-1', mode === 'swipe' && 'bg-muted')}
+              onClick={() => setMode('swipe')}
+            >
+              Swipe
+            </button>
+          </div>
+          <ListMenu listId={list.id} />
+        </div>
+        {mode === 'view' && (
+          <div className="flex flex-wrap items-center gap-2 pb-2">
+            {groupDraft === null ? (
+              <Button size="sm" variant="outline" onClick={() => setGroupDraft('New group')}>
+                + Group
+              </Button>
+            ) : (
+              <input
+                autoFocus
+                value={groupDraft}
+                onChange={(e) => setGroupDraft(e.target.value)}
+                onBlur={commitNewGroup}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitNewGroup();
+                  if (e.key === 'Escape') setGroupDraft(null);
+                }}
+                aria-label="New group name"
+                className="rounded-md border bg-background px-2 py-1 text-base"
+              />
+            )}
             <Button
               size="sm"
-              variant="outline"
-              className={hiddenCount > 0 ? '' : 'ml-auto'}
-              onClick={() => setGroupDraft('New group')}
+              variant={selectMode ? 'default' : 'outline'}
+              onClick={toggleSelectMode}
             >
-              + Group
+              {selectMode ? 'Done' : 'Select'}
             </Button>
-          ) : (
-            <input
-              autoFocus
-              value={groupDraft}
-              onChange={(e) => setGroupDraft(e.target.value)}
-              onBlur={commitNewGroup}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') commitNewGroup();
-                if (e.key === 'Escape') setGroupDraft(null);
-              }}
-              aria-label="New group name"
-              className={cn(
-                'rounded-md border bg-background px-2 py-1 text-base',
-                hiddenCount > 0 ? '' : 'ml-auto',
-              )}
-            />
-          ))}
-        {mode === 'view' && (
-          <Button
-            size="sm"
-            variant={selectMode ? 'default' : 'outline'}
-            onClick={toggleSelectMode}
-          >
-            {selectMode ? 'Done' : 'Select'}
-          </Button>
+            {hiddenCount > 0 && (
+              <Button
+                size="icon"
+                variant="outline"
+                aria-label="Show hidden cards"
+                onClick={() => setHiddenSheetOpen(true)}
+                className="ml-auto"
+              >
+                <EyeOff className="h-4 w-4" aria-hidden />
+              </Button>
+            )}
+          </div>
         )}
-        <div className={cn('inline-flex rounded-md border p-0.5 text-xs', mode === 'swipe' && 'ml-auto')}>
-          <button
-            className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
-            onClick={() => setMode('view')}
-          >
-            List
-          </button>
-          <button
-            className={cn('px-2 py-1', mode === 'swipe' && 'bg-muted')}
-            onClick={() => setMode('swipe')}
-          >
-            Swipe
-          </button>
-        </div>
-        <ListMenu listId={list.id} />
       </header>
 
       {mode === 'swipe' ? (
@@ -294,7 +304,6 @@ export default function ListScreen() {
                     <GroupHeader
                       listId={list.id}
                       group={g}
-                      count={rows.length}
                       dragHandleProps={selectMode ? undefined : dragHandleProps}
                     />
                     {!collapsed[g.id] && (
@@ -349,6 +358,8 @@ export default function ListScreen() {
         )}
       </DndContext>
 
+      <ExercisePeekStrip listId={list.id} />
+      <ExerciseSheet listId={list.id} />
       <HiddenCardsSheet listId={list.id} />
       <MoveToGroupDialog
         open={!!moveTarget}

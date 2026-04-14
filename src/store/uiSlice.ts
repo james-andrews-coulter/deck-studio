@@ -2,13 +2,15 @@ import type { StateCreator } from 'zustand';
 
 export type UISlice = {
   ui: {
-    collapsedGroups: Record<string, boolean>;       // keyed by groupId
+    collapsedGroups: Record<string, boolean>;
     hiddenSheetOpen: boolean;
     activeDeckDetail: string | null;
+    exerciseSheetOpenByListId: Record<string, boolean>;
   };
   toggleGroupCollapsed: (groupId: string) => void;
   setHiddenSheetOpen: (open: boolean) => void;
   setDeckDetail: (id: string | null) => void;
+  setExerciseSheetOpen: (listId: string, open: boolean) => void;
 };
 
 export const createUiSlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
@@ -16,6 +18,7 @@ export const createUiSlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
     collapsedGroups: {},
     hiddenSheetOpen: false,
     activeDeckDetail: null,
+    exerciseSheetOpenByListId: {},
   },
   toggleGroupCollapsed: (groupId) =>
     set((s) => ({
@@ -26,4 +29,11 @@ export const createUiSlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
     })),
   setHiddenSheetOpen: (open) => set((s) => ({ ui: { ...s.ui, hiddenSheetOpen: open } })),
   setDeckDetail: (id) => set((s) => ({ ui: { ...s.ui, activeDeckDetail: id } })),
+  setExerciseSheetOpen: (listId, open) =>
+    set((s) => ({
+      ui: {
+        ...s.ui,
+        exerciseSheetOpenByListId: { ...s.ui.exerciseSheetOpenByListId, [listId]: open },
+      },
+    })),
 });

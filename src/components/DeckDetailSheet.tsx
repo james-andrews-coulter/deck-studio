@@ -33,19 +33,25 @@ export function DeckDetailSheet() {
 
   const [listName, setListName] = useState('');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [exerciseId, setExerciseId] = useState<string>('');
+  const [autoFillSource, setAutoFillSource] = useState<string | null>(null);
 
   const open = !!deckId && !!deck;
 
   // Reset the inline name input whenever the sheet opens for a different deck
   useEffect(() => {
-    if (deckId) setListName('');
+    if (deckId) {
+      setListName('');
+      setExerciseId('');
+      setAutoFillSource(null);
+    }
   }, [deckId]);
 
   const closeSheet = () => setDeckDetail(null);
 
   const onCreateList = () => {
     if (!deckId || !listName.trim()) return;
-    const newListId = createList(deckId, listName.trim());
+    const newListId = createList(deckId, listName.trim(), exerciseId || undefined);
     closeSheet();
     navigate(`/lists/${newListId}`);
   };
@@ -80,9 +86,14 @@ export function DeckDetailSheet() {
                 <span>Deck</span>
               )}
             </SheetTitle>
-            <SheetDescription>
-              {deck ? `${deck.cards.length} ${deck.cards.length === 1 ? 'card' : 'cards'}` : ''}
+            <SheetDescription className="sr-only">
+              Deck actions
             </SheetDescription>
+            {deck && deck.exercises && deck.exercises.length > 0 && (
+              <span className="mt-1 inline-block w-fit rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                Exercises available
+              </span>
+            )}
           </SheetHeader>
 
           <div className="mt-4 space-y-4">
@@ -92,13 +103,57 @@ export function DeckDetailSheet() {
                 <input
                   className="mt-1 w-full rounded-md border bg-background p-2 text-base"
                   value={listName}
-                  onChange={(e) => setListName(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setListName(v);
+                    if (autoFillSource && v !== autoFillSource) {
+                      setAutoFillSource(null);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') onCreateList();
                   }}
                   placeholder="List name"
                 />
               </label>
+              {deck?.exercises && deck.exercises.length > 0 && (
+                <label className="block text-sm font-medium">
+                  Exercise (optional)
+                  <select
+                    className="mt-1 w-full rounded-md border bg-background p-2 text-base"
+                    value={exerciseId}
+                    onChange={(e) => {
+                      const nextId = e.target.value;
+                      setExerciseId(nextId);
+                      const ex = deck.exercises!.find((x) => x.id === nextId);
+                      const nameIsEmptyOrAutoFilled =
+                        !listName.trim() || listName === autoFillSource;
+                      if (ex && nameIsEmptyOrAutoFilled) {
+                        setListName(ex.name);
+                        setAutoFillSource(ex.name);
+                      }
+                    }}
+                  >
+                    <option value="">None — start empty</option>
+                    {deck.exercises.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.name}
+                      </option>
+                    ))}
+                  </select>
+                  {(() => {
+                    if (!exerciseId) return null;
+                    const ex = deck.exercises!.find((x) => x.id === exerciseId);
+                    if (!ex) return null;
+                    return (
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        Seeds {ex.groups.length} group
+                        {ex.groups.length === 1 ? '' : 's'}: {ex.groups.join(' · ')}
+                      </p>
+                    );
+                  })()}
+                </label>
+              )}
               <Button onClick={onCreateList} disabled={!listName.trim()}>
                 Create list
               </Button>

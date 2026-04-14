@@ -20,7 +20,7 @@ export function HiddenCardsSheet({ listId }: Props) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Hidden cards ({hiddenRefs.length})</SheetTitle>
+          <SheetTitle>Hidden cards</SheetTitle>
         </SheetHeader>
         <div className="mt-2 flex justify-end">
           <Button size="sm" variant="outline" onClick={() => restoreAll(listId)} disabled={!hiddenRefs.length}>

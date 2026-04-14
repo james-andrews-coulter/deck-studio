@@ -47,5 +47,19 @@
       "difficulty": "easy",
       "tags": ["rest"]
     }
+  ],
+  "exercises": [
+    {
+      "id": "priority-planner",
+      "name": "Priority Planner",
+      "instructions": "Our goals and priorities are not uniform: they require differing amounts of effort, and different timeframes in which they can be achieved.\n\nOnce you've selected a number of goals and priorities you wish to work towards, arrange them according to the time you expect it will take you to achieve them.",
+      "groups": ["This Week", "This Month", "This Year", "Next Five Years", "Over a Lifetime"]
+    },
+    {
+      "id": "keep-maybe-park",
+      "name": "Keep / Maybe / Park",
+      "instructions": "A fast triage. Move each card into one of three buckets based on your gut read.\n\n- **Keep:** you're confident it belongs.\n- **Maybe:** you're unsure — come back later.\n- **Park:** not now.",
+      "groups": ["Keep", "Maybe", "Park"]
+    }
   ]
 }

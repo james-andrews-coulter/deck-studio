@@ -1,0 +1,17 @@
+{
+  "name": "E2E Exercise Deck",
+  "fieldMapping": { "title": "t" },
+  "cards": [
+    { "id": "c1", "t": "Alpha" },
+    { "id": "c2", "t": "Beta" },
+    { "id": "c3", "t": "Gamma" }
+  ],
+  "exercises": [
+    {
+      "id": "triage",
+      "name": "Triage",
+      "instructions": "Keep or park each card.",
+      "groups": ["Keep", "Park"]
+    }
+  ]
+}

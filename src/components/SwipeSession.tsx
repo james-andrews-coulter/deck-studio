@@ -28,8 +28,6 @@ export function SwipeSession({ listId, onDone }: Props) {
   const [undoStack, setUndoStack] = useState<
     Array<{ cardId: string; direction: 'keep' | 'discard' }>
   >([]);
-  const [kept, setKept] = useState(0);
-  const [discarded, setDiscarded] = useState(0);
 
   if (!list || !deck) return null;
 
@@ -40,9 +38,6 @@ export function SwipeSession({ listId, onDone }: Props) {
     return (
       <div className="flex flex-col items-center gap-3 p-10 text-center">
         <h3 className="text-xl font-semibold">All done</h3>
-        <p className="text-muted-foreground">
-          {kept} kept · {discarded} discarded
-        </p>
         <Button onClick={onDone}>Back to list</Button>
       </div>
     );
@@ -54,12 +49,7 @@ export function SwipeSession({ listId, onDone }: Props) {
   const card = deck.cards.find((c) => c.id === cardId);
 
   const commit = (dir: 'keep' | 'discard') => {
-    if (dir === 'discard') {
-      setHidden(listId, cardId, true);
-      setDiscarded((n) => n + 1);
-    } else {
-      setKept((n) => n + 1);
-    }
+    if (dir === 'discard') setHidden(listId, cardId, true);
     setUndoStack((s) => [...s, { cardId, direction: dir }]);
     setIndex((i) => i + 1);
   };
@@ -69,8 +59,6 @@ export function SwipeSession({ listId, onDone }: Props) {
     if (!last) return;
     if (last.direction === 'discard') setHidden(listId, last.cardId, false);
     setUndoStack((s) => s.slice(0, -1));
-    if (last.direction === 'keep') setKept((n) => n - 1);
-    else setDiscarded((n) => n - 1);
     setIndex((i) => i - 1);
   };
 
@@ -78,20 +66,13 @@ export function SwipeSession({ listId, onDone }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div className="flex w-full items-center justify-end">
-        <span className="rounded-full bg-muted px-3 py-1 text-xs">
-          {total - index} / {total}
-        </span>
-      </div>
-      <div className="w-full max-w-md">
-        <SwipeCard
-          key={`${cardId}-${index}`}
-          card={card}
-          mapping={deck.fieldMapping}
-          onCommit={commit}
-        />
-      </div>
-      <div className="flex flex-wrap justify-center gap-2">
+      <SwipeCard
+        key={`${cardId}-${index}`}
+        card={card}
+        mapping={deck.fieldMapping}
+        onCommit={commit}
+      />
+      <div className="flex shrink-0 flex-wrap justify-center gap-2">
         <Button variant="outline" onClick={() => commit('discard')}>
           Discard
         </Button>

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-test('swipe session discards one and updates hidden counter', async ({ page }) => {
+test('swipe session discards one and surfaces it in the hidden sheet', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /import deck/i }).click();
   await page.setInputFiles('input[type=file]', path.join(__dirname, 'fixtures/sample.json'));
@@ -28,6 +28,8 @@ test('swipe session discards one and updates hidden counter', async ({ page }) =
   await expect(page.getByRole('heading', { name: /all done/i })).toBeVisible();
   await page.getByRole('button', { name: /back to list/i }).click();
 
-  // Hidden counter should show 1 hidden (Alpha discarded)
-  await expect(page.getByText(/1 hidden/i)).toBeVisible();
+  // Discarded card (Alpha) should be reachable via the Hidden sheet
+  await page.getByRole('button', { name: /show hidden cards/i }).click();
+  await expect(page.getByRole('heading', { name: /^hidden cards$/i })).toBeVisible();
+  await expect(page.getByText('Alpha')).toBeVisible();
 });

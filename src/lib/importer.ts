@@ -1,5 +1,5 @@
 import { uuid } from './uuid';
-import type { Card, FieldMapping } from './types';
+import type { Card, Exercise, FieldMapping } from './types';
 
 export class ImportError extends Error {
   constructor(message: string) {
@@ -12,12 +12,69 @@ export type ParsedDeck = {
   name: string;
   cards: Card[];
   fieldMapping: FieldMapping;
+  exercises: Exercise[];
   detectedKeys: string[];
   skippedMapping: boolean;
   warnings: string[];
 };
 
 const stripExt = (filename: string) => filename.replace(/\.json$/i, '');
+
+function addWarningOnce(warnings: string[], code: string) {
+  if (!warnings.includes(code)) warnings.push(code);
+}
+
+function parseExercises(raw: unknown, warnings: string[]): Exercise[] {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) {
+    addWarningOnce(warnings, 'exercise_entry_invalid');
+    return [];
+  }
+  const out: Exercise[] = [];
+  const seenIds = new Set<string>();
+  for (const entry of raw) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      addWarningOnce(warnings, 'exercise_entry_invalid');
+      continue;
+    }
+    const e = entry as Record<string, unknown>;
+    const id = typeof e.id === 'string' ? e.id.trim() : '';
+    if (!id) {
+      addWarningOnce(warnings, 'exercise_id_invalid');
+      continue;
+    }
+    if (seenIds.has(id)) {
+      addWarningOnce(warnings, 'exercise_id_duplicate');
+      continue;
+    }
+    const name = typeof e.name === 'string' ? e.name.trim() : '';
+    if (!name) {
+      addWarningOnce(warnings, 'exercise_name_missing');
+      continue;
+    }
+    if (e.instructions !== undefined && typeof e.instructions !== 'string') {
+      addWarningOnce(warnings, 'exercise_instructions_invalid');
+      continue;
+    }
+    const instructions = typeof e.instructions === 'string' ? e.instructions : '';
+    if (!Array.isArray(e.groups)) {
+      addWarningOnce(warnings, 'exercise_groups_missing');
+      continue;
+    }
+    if ((e.groups as unknown[]).some((g) => typeof g !== 'string')) {
+      addWarningOnce(warnings, 'exercise_groups_invalid');
+      continue;
+    }
+    const groups = (e.groups as string[]).map((g) => g.trim()).filter(Boolean);
+    if (groups.length === 0) {
+      addWarningOnce(warnings, 'exercise_groups_missing');
+      continue;
+    }
+    out.push({ id, name, instructions, groups });
+    seenIds.add(id);
+  }
+  return out;
+}
 
 export function parseDeck(raw: string, filename: string): ParsedDeck {
   let data: unknown;
@@ -30,6 +87,7 @@ export function parseDeck(raw: string, filename: string): ParsedDeck {
   let name = stripExt(filename);
   let rawCards: unknown;
   let suppliedMapping: Partial<FieldMapping> | undefined;
+  let rawExercises: unknown;
 
   if (Array.isArray(data)) {
     rawCards = data;
@@ -45,6 +103,7 @@ export function parseDeck(raw: string, filename: string): ParsedDeck {
     if (obj.fieldMapping && typeof obj.fieldMapping === 'object') {
       suppliedMapping = obj.fieldMapping as Partial<FieldMapping>;
     }
+    rawExercises = obj.exercises;
   } else {
     throw new ImportError(
       "File doesn't look like a deck. Expected an array of cards or { name, cards: [...] }."
@@ -90,5 +149,7 @@ export function parseDeck(raw: string, filename: string): ParsedDeck {
     }
   }
 
-  return { name, cards, fieldMapping, detectedKeys, skippedMapping, warnings };
+  const exercises = parseExercises(rawExercises, warnings);
+
+  return { name, cards, fieldMapping, exercises, detectedKeys, skippedMapping, warnings };
 }

@@ -21,7 +21,7 @@ describe('GroupHeader', () => {
     useAppStore.getState().addGroup(listId, 'Starters');
     const group = useAppStore.getState().lists[listId].groups[0];
 
-    render(<GroupHeader listId={listId} group={group} count={0} />);
+    render(<GroupHeader listId={listId} group={group} />);
     await user.click(screen.getByRole('button', { name: /Starters/i }));
     const input = screen.getByRole('textbox');
     await user.clear(input);

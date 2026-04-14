@@ -22,11 +22,10 @@ const colorSwatch: Record<GroupColor, string> = {
 type Props = {
   listId: string;
   group: Group;
-  count: number;
   dragHandleProps?: HTMLAttributes<HTMLDivElement>;
 };
 
-export function GroupHeader({ listId, group, count, dragHandleProps }: Props) {
+export function GroupHeader({ listId, group, dragHandleProps }: Props) {
   const collapsed = useAppStore((s) => !!s.ui.collapsedGroups[group.id]);
   const toggleCollapsed = useAppStore((s) => s.toggleGroupCollapsed);
   const renameGroup = useAppStore((s) => s.renameGroup);
@@ -77,7 +76,6 @@ export function GroupHeader({ listId, group, count, dragHandleProps }: Props) {
           {group.name}
         </button>
       )}
-      <span className="text-xs text-muted-foreground">{count}</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
