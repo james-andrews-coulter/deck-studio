@@ -28,10 +28,9 @@
       --ring: 212.7 26.8% 83.9%;
     }
   }
-  html, body, #root { height: 100%; }
+  html, body { min-height: 100%; }
   body { @apply bg-background text-foreground antialiased; }
   body {
-    padding-bottom: env(safe-area-inset-bottom);
     padding-top: env(safe-area-inset-top);
   }
 }
