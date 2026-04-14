@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { MoreVertical } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -19,25 +18,11 @@ type Props = { listId: string };
 export function ListMenu({ listId }: Props) {
   const list = useAppStore((s) => s.lists[listId]);
   const deck = useAppStore((s) => (list ? s.decks[list.deckId] : undefined));
-  const setCardRefs = useAppStore((s) => s.setCardRefs);
-  const shuffleList = useAppStore((s) => s.shuffleList);
   const clearAllGroups = useAppStore((s) => s.clearAllGroups);
   const deleteList = useAppStore((s) => s.deleteList);
   const navigate = useNavigate();
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   if (!list) return null;
-
-  const onShuffle = () => {
-    const before = list.cardRefs;
-    shuffleList(listId);
-    toast('Shuffled', {
-      duration: 5000,
-      action: {
-        label: 'Undo',
-        onClick: () => setCardRefs(listId, before),
-      },
-    });
-  };
 
   const onExport = () => {
     if (!deck) return;
@@ -53,7 +38,6 @@ export function ListMenu({ listId }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onShuffle}>Shuffle</DropdownMenuItem>
           <DropdownMenuItem onClick={onExport} disabled={!deck}>
             Export as markdown
           </DropdownMenuItem>

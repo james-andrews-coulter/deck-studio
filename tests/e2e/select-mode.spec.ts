@@ -38,6 +38,6 @@ test('select mode: bulk-create a group from checked cards', async ({ page }) => 
   const warmupsRegion = page.locator('section').filter({ hasText: 'Warm-ups' });
   await expect(warmupsRegion.getByText('Alpha')).toBeVisible();
   await expect(warmupsRegion.getByText('Beta')).toBeVisible();
-  // Gamma is still under (Ungrouped)
-  await expect(page.getByText(/\(Ungrouped\)/i)).toBeVisible();
+  // Gamma is still under Ungrouped
+  await expect(page.getByText(/^ungrouped$/i)).toBeVisible();
 });

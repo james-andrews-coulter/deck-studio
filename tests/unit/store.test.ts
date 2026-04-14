@@ -68,14 +68,6 @@ describe('store', () => {
     expect(list.cardRefs[0].groupId).toBe(null);
   });
 
-  it('shuffles cardRefs (still same length and same ids)', () => {
-    const deckId = useAppStore.getState().addDeck(sampleDeck);
-    const listId = useAppStore.getState().createList(deckId, 'L');
-    useAppStore.getState().shuffleList(listId);
-    const ids = useAppStore.getState().lists[listId].cardRefs.map((r) => r.cardId);
-    expect(ids.sort()).toEqual(['c1', 'c2', 'c3']);
-  });
-
   it('deleteDeck does NOT cascade-delete lists', () => {
     const deckId = useAppStore.getState().addDeck(sampleDeck);
     const listId = useAppStore.getState().createList(deckId, 'L');

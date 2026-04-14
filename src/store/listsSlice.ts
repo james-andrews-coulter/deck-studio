@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { CardRef, Group, List } from '@/lib/types';
 import { uuid } from '@/lib/uuid';
-import { shuffle } from '@/lib/shuffle';
 
 export type ListsSlice = {
   lists: Record<string, List>;
@@ -28,7 +27,6 @@ export type ListsSlice = {
     insertIndexInGroup: number
   ) => void;
 
-  shuffleList: (listId: string) => void;
   setCardRefs: (listId: string, cardRefs: CardRef[]) => void;
 };
 
@@ -186,9 +184,6 @@ export const createListsSlice: StateCreator<
       next.splice(targetGlobalIndex, 0, updated);
       return { ...l, cardRefs: next };
     })),
-
-  shuffleList: (listId) =>
-    set(withList(listId, (l) => ({ ...l, cardRefs: shuffle(l.cardRefs) }))),
 
   setCardRefs: (listId, cardRefs) =>
     set(withList(listId, (l) => ({ ...l, cardRefs }))),
