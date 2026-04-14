@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   DndContext,
@@ -32,6 +32,8 @@ import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
 import { SelectionActionBar } from '@/components/SelectionActionBar';
 import { GroupNameInput } from '@/components/GroupNameInput';
 import { GroupDropZone } from '@/components/GroupDropZone';
+import { MetaFilterBar } from '@/components/MetaFilterBar';
+import { cardMatchesFilters, getMetaFilterOptions } from '@/lib/metaFilters';
 import { useListSelection } from '@/hooks/useListSelection';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,8 +64,33 @@ export default function ListScreen() {
   const [moveTarget, setMoveTarget] = useState<{ cardIds: string[] } | null>(null);
   const [newGroupFromSelectionOpen, setNewGroupFromSelectionOpen] = useState(false);
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
+  const [metaFilters, setMetaFilters] = useState<Record<string, Set<string>>>({});
   const { selectMode, selected, toggleSelect, clearSelection, toggleSelectMode } =
     useListSelection();
+
+  const metaOptions = useMemo(
+    () => (deck ? getMetaFilterOptions(deck) : {}),
+    [deck],
+  );
+
+  const toggleMetaFilter = (key: string, value: string) => {
+    setMetaFilters((prev) => {
+      const next = { ...prev };
+      const set = new Set(next[key] ?? []);
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+      next[key] = set;
+      return next;
+    });
+  };
+
+  const clearMetaFilter = (key: string) => {
+    setMetaFilters((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   const [params, setParams] = useSearchParams();
   const mode = (params.get('mode') ?? 'view') as 'view' | 'swipe';
@@ -116,7 +143,15 @@ export default function ListScreen() {
   }
 
   const hiddenCount = list.cardRefs.filter((r) => r.hidden).length;
-  const ungroupedRows = list.cardRefs.filter((r) => r.groupId === null && !r.hidden);
+  const activeFilterCount = Object.values(metaFilters).reduce((n, s) => n + s.size, 0);
+  const ungroupedRows = list.cardRefs
+    .filter((r) => r.groupId === null && !r.hidden)
+    .filter((r) => {
+      if (activeFilterCount === 0) return true;
+      const card = deck.cards.find((c) => c.id === r.cardId);
+      if (!card) return true;
+      return cardMatchesFilters(card, metaFilters);
+    });
 
   const onDragEnd = (evt: DragEndEvent) => {
     const { active, over } = evt;
@@ -327,6 +362,12 @@ export default function ListScreen() {
                   </Button>
                 )}
               </div>
+              <MetaFilterBar
+                optionsByKey={metaOptions}
+                filters={metaFilters}
+                onToggle={toggleMetaFilter}
+                onClear={clearMetaFilter}
+              />
               <div className="max-h-[50svh] overflow-y-auto p-3">
                 <GroupDropZone groupId={null}>
                   <SortableContext
@@ -335,7 +376,9 @@ export default function ListScreen() {
                   >
                     {ungroupedRows.length === 0 ? (
                       <p className="py-6 text-center text-xs text-muted-foreground">
-                        No ungrouped cards.
+                        {activeFilterCount > 0
+                          ? 'No cards match the current filters.'
+                          : 'No ungrouped cards.'}
                       </p>
                     ) : (
                       <ul className="space-y-1.5">
