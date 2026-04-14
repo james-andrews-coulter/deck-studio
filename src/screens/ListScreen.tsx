@@ -26,6 +26,7 @@ import { SortableCard } from '@/components/SortableCard';
 import { ListMenu } from '@/components/ListMenu';
 import { SwipeSession } from '@/components/SwipeSession';
 import { SwipeableRow } from '@/components/SwipeableRow';
+import { NavHamburger } from '@/components/NavHamburger';
 import { FolderInput } from 'lucide-react';
 import { MoveToGroupDialog } from '@/components/MoveToGroupDialog';
 import { SelectionActionBar } from '@/components/SelectionActionBar';
@@ -227,33 +228,15 @@ export default function ListScreen() {
   };
 
   return (
-    <div
-      className={cn(
-        'p-3 md:p-5',
-        hasResolvedExercise && mode === 'view' && 'pb-24 md:pr-16',
-      )}
-    >
-      <header className="sticky top-0 z-20 -mx-3 border-b bg-background px-3 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md md:-mx-5 md:px-5">
+    <div>
+      <header className="sticky top-0 z-20 border-b bg-background px-3 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md md:px-5">
         <div className="flex items-center gap-2 py-2">
+          <NavHamburger />
           <div className="min-w-0 flex-1">
             <InlineRenameHeading
               value={list.name}
               onChange={(next) => useAppStore.getState().renameList(list.id, next)}
             />
-          </div>
-          <div className="inline-flex shrink-0 rounded-md border p-0.5 text-xs">
-            <button
-              className={cn('px-2 py-1', mode === 'view' && 'bg-muted')}
-              onClick={() => setMode('view')}
-            >
-              List
-            </button>
-            <button
-              className={cn('px-2 py-1', mode === 'swipe' && 'bg-muted')}
-              onClick={() => setMode('swipe')}
-            >
-              Swipe
-            </button>
           </div>
           <ListMenu listId={list.id} />
         </div>
@@ -298,6 +281,12 @@ export default function ListScreen() {
           </div>
         )}
       </header>
+      <div
+        className={cn(
+          'p-3 pb-20 md:p-5 md:pb-20',
+          hasResolvedExercise && mode === 'view' && 'md:pr-16',
+        )}
+      >
 
       {mode === 'swipe' ? (
         <SwipeSession listId={list.id} onDone={() => setMode('view')} />
@@ -422,6 +411,33 @@ export default function ListScreen() {
       )}
         </>
       )}
+      </div>
+      <nav
+        aria-label="View mode"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-2 border-t bg-background supports-[backdrop-filter]:bg-background/90 supports-[backdrop-filter]:backdrop-blur-md"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <button
+          type="button"
+          onClick={() => setMode('view')}
+          className={cn(
+            'flex items-center justify-center gap-2 py-3 text-sm font-medium',
+            mode === 'view' ? 'text-foreground' : 'text-muted-foreground',
+          )}
+        >
+          List
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('swipe')}
+          className={cn(
+            'flex items-center justify-center gap-2 py-3 text-sm font-medium',
+            mode === 'swipe' ? 'text-foreground' : 'text-muted-foreground',
+          )}
+        >
+          Swipe
+        </button>
+      </nav>
     </div>
   );
 }

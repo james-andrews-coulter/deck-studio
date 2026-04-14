@@ -14,7 +14,7 @@ test('import, create list, export markdown', async ({ page }) => {
   await expect(page.getByRole('button', { name: /E2E Deck/ })).toBeVisible();
 
   // Create list
-  await page.getByRole('link', { name: /^lists$/i }).click();
+  await page.getByRole('button', { name: /open navigation/i }).click(); await page.getByRole('link', { name: /^lists$/i }).click();
   await page.getByRole('button', { name: /new list/i }).click();
   await page.getByRole('combobox').selectOption({ label: 'E2E Deck' });
   await page.getByPlaceholder(/shortlist/i).fill('Shortlist');

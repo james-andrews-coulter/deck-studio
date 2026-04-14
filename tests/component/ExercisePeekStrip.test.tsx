@@ -9,7 +9,7 @@ const baseUi = {
   collapsedGroups: {},
   hiddenSheetOpen: false,
   activeDeckDetail: null,
-  exerciseSheetOpenByListId: {},
+  exerciseSheetOpenByListId: {}, navDrawerOpen: false,
 };
 
 function setup(hasExercise: boolean) {

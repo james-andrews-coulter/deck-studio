@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
+import { NavHamburger } from '@/components/NavHamburger';
 import { useAppStore } from '@/store';
 import { exportListFile } from '@/lib/exportListFile';
 
@@ -97,13 +98,15 @@ export default function ListsScreen() {
   };
 
   return (
-    <div className="p-3 md:p-5">
-      <header className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Lists</h2>
+    <div>
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background px-3 py-2 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md md:px-5">
+        <NavHamburger />
+        <h2 className="flex-1 truncate text-xl font-semibold">Lists</h2>
         <Button onClick={() => setWizardOpen(true)} disabled={decks.length === 0}>
           + New list
         </Button>
       </header>
+      <div className="p-3 md:p-5">
 
       {lists.length === 0 ? (
         <EmptyState
@@ -283,6 +286,7 @@ export default function ListsScreen() {
           if (deleteTarget) deleteList(deleteTarget.id);
         }}
       />
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@ test('swipe session discards one and surfaces it in the hidden sheet', async ({ 
   await page.getByRole('button', { name: /import deck/i }).click();
   await page.setInputFiles('input[type=file]', path.join(__dirname, 'fixtures/sample.json'));
 
-  await page.getByRole('link', { name: /^lists$/i }).click();
+  await page.getByRole('button', { name: /open navigation/i }).click(); await page.getByRole('link', { name: /^lists$/i }).click();
   await page.getByRole('button', { name: /new list/i }).click();
   await page.getByRole('combobox').selectOption({ label: 'E2E Deck' });
   await page.getByPlaceholder(/shortlist/i).fill('Review');

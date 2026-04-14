@@ -10,7 +10,7 @@ type Props = {
 export function SelectionActionBar({ count, onClear, onNewGroup, onMoveTo }: Props) {
   if (count === 0) return null;
   return (
-    <div className="fixed inset-x-0 bottom-14 z-20 mx-auto flex max-w-md items-center justify-between gap-2 rounded-full border bg-background p-2 shadow-lg md:bottom-4">
+    <div className="fixed inset-x-2 bottom-20 z-40 mx-auto flex max-w-md items-center justify-between gap-2 rounded-full border bg-background p-2 shadow-lg">
       <span className="pl-3 text-sm">Selected</span>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" onClick={onClear}>

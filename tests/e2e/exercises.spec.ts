@@ -14,7 +14,7 @@ test('exercise picker seeds groups and companion opens', async ({ page }) => {
 
   await expect(page.getByRole('button', { name: /E2E Exercise Deck/ })).toBeVisible();
 
-  await page.getByRole('link', { name: /^lists$/i }).click();
+  await page.getByRole('button', { name: /open navigation/i }).click(); await page.getByRole('link', { name: /^lists$/i }).click();
   await page.getByRole('button', { name: /new list/i }).click();
 
   await page
@@ -49,7 +49,7 @@ test('None option gives a list with no peek strip', async ({ page }) => {
     path.join(__dirname, 'fixtures/sample-with-exercises.json'),
   );
 
-  await page.getByRole('link', { name: /^lists$/i }).click();
+  await page.getByRole('button', { name: /open navigation/i }).click(); await page.getByRole('link', { name: /^lists$/i }).click();
   await page.getByRole('button', { name: /new list/i }).click();
   await page
     .getByRole('combobox', { name: /deck/i })

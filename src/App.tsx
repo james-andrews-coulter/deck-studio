@@ -9,7 +9,12 @@ export default function App() {
       <ErrorBoundary>
         <RouterProvider router={router} />
       </ErrorBoundary>
-      <Toaster position="top-center" />
+      <Toaster
+        position="bottom-center"
+        offset={72}
+        mobileOffset={72}
+        toastOptions={{ className: 'max-w-[calc(100vw-2rem)]' }}
+      />
     </>
   );
 }

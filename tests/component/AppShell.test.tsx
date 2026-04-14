@@ -1,9 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import 'fake-indexeddb/auto';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
 import DecksScreen from '@/screens/DecksScreen';
 import ListsScreen from '@/screens/ListsScreen';
+import { useAppStore } from '@/store';
 
 const renderAt = (path: string) =>
   render(
@@ -19,10 +22,16 @@ const renderAt = (path: string) =>
   );
 
 describe('AppShell', () => {
-  it('renders Decks and Lists tabs', () => {
+  beforeEach(() => {
+    useAppStore.setState((s) => ({ ...s, ui: { ...s.ui, navDrawerOpen: false } }));
+  });
+
+  it('opens the nav drawer and reveals Decks + Lists links', async () => {
+    const user = userEvent.setup();
     renderAt('/decks');
-    expect(screen.getByRole('link', { name: /decks/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /lists/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /open navigation/i }));
+    expect(screen.getByRole('link', { name: /^decks$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^lists$/i })).toBeInTheDocument();
   });
 
   it('renders the Decks screen at /decks', () => {

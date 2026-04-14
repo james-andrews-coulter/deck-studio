@@ -6,11 +6,13 @@ export type UISlice = {
     hiddenSheetOpen: boolean;
     activeDeckDetail: string | null;
     exerciseSheetOpenByListId: Record<string, boolean>;
+    navDrawerOpen: boolean;
   };
   toggleGroupCollapsed: (groupId: string) => void;
   setHiddenSheetOpen: (open: boolean) => void;
   setDeckDetail: (id: string | null) => void;
   setExerciseSheetOpen: (listId: string, open: boolean) => void;
+  setNavDrawerOpen: (open: boolean) => void;
 };
 
 export const createUiSlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
@@ -19,6 +21,7 @@ export const createUiSlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
     hiddenSheetOpen: false,
     activeDeckDetail: null,
     exerciseSheetOpenByListId: {},
+    navDrawerOpen: false,
   },
   toggleGroupCollapsed: (groupId) =>
     set((s) => ({
@@ -36,4 +39,6 @@ export const createUiSlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
         exerciseSheetOpenByListId: { ...s.ui.exerciseSheetOpenByListId, [listId]: open },
       },
     })),
+  setNavDrawerOpen: (open) =>
+    set((s) => ({ ui: { ...s.ui, navDrawerOpen: open } })),
 });
