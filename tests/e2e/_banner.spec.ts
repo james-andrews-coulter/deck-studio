@@ -1,20 +1,19 @@
-// Run with: npx playwright test _banner --project=chromium
-// Renders docs/banner.png from a local HTML composition that embeds the
-// real mobile screenshots captured by _screenshots.spec.ts.
+// CAPTURE=1 npx playwright test _banner --project=chromium
 
 import { test } from '@playwright/test';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCREENS = path.join(__dirname, '..', '..', 'docs', 'screenshots');
 const OUT = path.join(__dirname, '..', '..', 'docs', 'banner.png');
 
-function dataUrl(pngPath: string): string {
-  const b64 = readFileSync(pngPath).toString('base64');
-  return `data:image/png;base64,${b64}`;
-}
+// page.setContent runs on about:blank, which blocks file:// image loads.
+// Inlining the PNGs as data URLs keeps them same-origin.
+const dataUrl = (p: string) => `data:image/png;base64,${readFileSync(p).toString('base64')}`;
+
+test.skip(!process.env.CAPTURE, 'dev-only asset generation; set CAPTURE=1');
 
 test('render banner', async ({ browser }) => {
   test.setTimeout(30_000);
@@ -33,10 +32,7 @@ test('render banner', async ({ browser }) => {
     position: relative;
     overflow: hidden;
   }
-  .wordmark {
-    position: absolute; left: 72px; top: 88px;
-    color: #0f172a;
-  }
+  .wordmark { position: absolute; left: 72px; top: 88px; color: #0f172a; }
   .wordmark .name { font-size: 64px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
   .wordmark .tag  { font-size: 22px; font-weight: 500; color: #475569; margin-top: 20px; max-width: 420px; line-height: 1.4; }
   .chips { margin-top: 28px; display: flex; gap: 8px; flex-wrap: wrap; }
@@ -49,7 +45,7 @@ test('render banner', async ({ browser }) => {
     position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
     display: flex; gap: 28px; align-items: center;
   }
-  /* Phone inner aspect tuned to iPhone 13 viewport (390 x 844). */
+  /* Phone aspect tuned to iPhone 13 viewport (390 x 844). */
   .phone {
     width: 252px; height: 548px;
     background: #0f172a;
@@ -60,12 +56,7 @@ test('render banner', async ({ browser }) => {
       0 6px 14px rgba(15, 23, 42, 0.12),
       inset 0 0 0 2px #1e293b;
   }
-  .phone .screen {
-    width: 100%; height: 100%;
-    border-radius: 30px;
-    background: #ffffff;
-    overflow: hidden;
-  }
+  .phone .screen { width: 100%; height: 100%; border-radius: 30px; background: #ffffff; overflow: hidden; }
   .phone img { width: 100%; height: 100%; object-fit: contain; object-position: top center; background: #ffffff; display: block; }
   .phone.tilt-left  { transform: rotate(-5deg) translateY(6px); }
   .phone.tilt-right { transform: rotate(5deg)  translateY(6px); }
@@ -88,7 +79,6 @@ test('render banner', async ({ browser }) => {
 <body>
   <div class="blob"></div>
   <div class="blob2"></div>
-
   <div class="wordmark">
     <div class="name">Deck Studio</div>
     <div class="tag">Mobile-first card-sorting. Import a deck, triage with a swipe, send the keepers anywhere.</div>
@@ -98,7 +88,6 @@ test('render banner', async ({ browser }) => {
       <span class="chip">Open source</span>
     </div>
   </div>
-
   <div class="stage">
     <div class="phone tilt-left"><div class="screen"><img src="${decks}" alt="Decks"/></div></div>
     <div class="phone center"><div class="screen"><img src="${list}" alt="List"/></div></div>
@@ -106,13 +95,15 @@ test('render banner', async ({ browser }) => {
   </div>
 </body></html>`;
 
-  const tmpFile = path.join(SCREENS, '..', '_banner.html');
-  (await import('node:fs')).writeFileSync(tmpFile, html);
-  const context = await browser.newContext({ viewport: { width: 1600, height: 720 }, deviceScaleFactor: 2 });
-  const page = await context.newPage();
-  await page.goto(pathToFileURL(tmpFile).href);
-  await page.waitForLoadState('networkidle');
-  await page.screenshot({ path: OUT, type: 'png', fullPage: false });
-  await context.close();
-  (await import('node:fs')).unlinkSync(tmpFile);
+  const context = await browser.newContext({
+    viewport: { width: 1600, height: 720 },
+    deviceScaleFactor: 2,
+  });
+  try {
+    const page = await context.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle' });
+    await page.screenshot({ path: OUT, type: 'png', fullPage: false });
+  } finally {
+    await context.close();
+  }
 });

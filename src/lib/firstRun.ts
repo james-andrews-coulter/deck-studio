@@ -1,4 +1,4 @@
-const FIRST_IMPORT_SHOWN_KEY = 'deck-studio:firstImportShown';
+export const FIRST_IMPORT_SHOWN_KEY = 'deck-studio:firstImportShown';
 
 /** True once the first-import tip has been shown to this browser profile. */
 export function hasShownFirstImport(): boolean {

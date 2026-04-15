@@ -2,10 +2,6 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  // Underscore-prefixed specs are asset-generation utilities (screenshots,
-  // banner). Run them explicitly with `npx playwright test _screenshots` or
-  // `_banner`; keep them out of the CI pass.
-  testIgnore: /\/_.*\.spec\.ts$/,
   fullyParallel: true,
   retries: 0,
   use: {
