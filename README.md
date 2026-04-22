@@ -1,6 +1,6 @@
 <div align="center">
 
-![Deck Studio](docs/banner.png)
+![riffle](docs/banner.png)
 
 **A mobile-first web app for sorting card decks — import once, triage with a swipe, build down into focused shortlists, export as markdown.**
 
@@ -14,7 +14,7 @@
 
 If you've ever tried to prioritise something using an exercise — the Pyramid of Psychological Needs, Oblique Strategies, Values Cards, a personal retro, a year-end review — you've probably run it on paper cards, or a too-heavy Notion board, or a whiteboard full of Post-its you had to photograph before they fell off.
 
-Deck Studio is the in-between version: a web app you open on your phone, import the deck once, and run the exercise from the couch. Keep / discard / skip. Drag keepers into folders. Build a narrower list from what survives and run a different exercise on it. Export the result to markdown when you're done.
+riffle is the in-between version: a web app you open on your phone, import the deck once, and run the exercise from the couch. Keep / discard / skip. Drag keepers into folders. Build a narrower list from what survives and run a different exercise on it. Export the result to markdown when you're done.
 
 No backend. No account. All data lives in your browser.
 
